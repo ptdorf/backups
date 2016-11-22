@@ -1,6 +1,7 @@
 language: python
 
 script:
+  - echo $PATH
   - ls -la /usr/local/bin/
   - ls -la /usr/bin/
 
