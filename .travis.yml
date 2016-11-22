@@ -14,4 +14,8 @@ language: python
 # script: tox
 
 notifications:
-  email: always
+  email: 
+    recipients:
+      - ptdorf@gmail.com
+  on_failure: always
+  on_success: always
