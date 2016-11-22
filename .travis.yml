@@ -11,7 +11,9 @@ language: python
 
 # install: pip install tox
 
-script: which pytest
+script:
+  - ls -la /usr/local/bin/pytest
+  - ls -la /usr/bin/pytest
 
 notifications:
   email: 
