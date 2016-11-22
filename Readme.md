@@ -10,7 +10,7 @@ Basic tool to backup mysql servers.
 
 ### Setup
 
-Create a `/etc/backups/backups.yaml` with content similar to
+Create a `/etc/backups/backups.yaml` file with content similar to:
 
 ```yaml
 backups:
@@ -19,9 +19,9 @@ backups:
       type:                   mysql
       host:                   localhost
       username:               backup
-      password:               x
+      password:               password
     options:
-      encryption:             x
+      encryption:             secret
     s3:
       bucket:                 acme-backup-databases
       path:                   live/mysql/<suffix>
