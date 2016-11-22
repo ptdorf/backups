@@ -2,6 +2,8 @@
 
 Basic tool to backup mysql servers.
 
+[![Build Status](https://travis-ci.org/ptdorf/backup-mysql.svg?branch=master)](https://travis-ci.org/ptdorf/backup-mysql)
+
 
 ### Installation
 
