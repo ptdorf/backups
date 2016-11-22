@@ -1,23 +1,11 @@
-# this file is *not* meant to cover or endorse the use of travis, but rather to
-# help confirm pull requests to this project.
-
 language: python
 
-# env:
-#   - TOXENV=py26
-#   - TOXENV=py27
-#   - TOXENV=py33
-#   - TOXENV=py34
-
-# install: pip install tox
-
 script:
-  - ls -la /usr/local/bin/pytest*
-  - ls -la /usr/bin/pytest*
+  - ls -la /usr/local/bin/
+  - ls -la /usr/bin/
 
 notifications:
   email: 
     recipients:
       - ptdorf@gmail.com
   on_failure: always
-  on_success: always
