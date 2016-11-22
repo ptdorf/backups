@@ -11,7 +11,7 @@ language: python
 
 # install: pip install tox
 
-script: pytest
+script: which pytest
 
 notifications:
   email: 
