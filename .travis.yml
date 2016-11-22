@@ -2,8 +2,12 @@ language: python
 
 script:
   - echo $PATH
-  - ls -la /usr/local/bin/
-  - ls -la /usr/bin/
+  # - ls -la /usr/local/bin/
+  # - ls -la /usr/bin/
+  - coverage run tests.py
+
+after_success:
+  - codecov
 
 notifications:
   email: 
