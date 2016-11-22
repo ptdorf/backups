@@ -1,3 +1,0 @@
-[console_scripts]
-backup-mysql = backup.mysql:main
-
