@@ -5,7 +5,7 @@ script:
   # - ls -la /usr/local/bin/
   # - ls -la /usr/bin/
   - coverage run tests/test_simple.py
-  - pytest --version
+  - py.test --version
 
 after_success:
   - codecov
