@@ -30,4 +30,4 @@ backups:
 
 Now run it with
 
-    `backup-mysql server`
+    backup-mysql server
