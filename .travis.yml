@@ -1,11 +1,11 @@
 language: python
 
 script:
-  - echo $PATH
+  # - echo $PATH
   # - ls -la /usr/local/bin/
   # - ls -la /usr/bin/
   - coverage run tests/test_simple.py
-  - py.test --version
+  - py.test
 
 after_success:
   - codecov
