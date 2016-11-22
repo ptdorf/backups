@@ -27,3 +27,7 @@ backups:
       path:                   live/mysql/<suffix>
 
 ```
+
+Now run it with
+
+    `backup-mysql server`
