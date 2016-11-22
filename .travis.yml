@@ -4,7 +4,8 @@ script:
   - echo $PATH
   # - ls -la /usr/local/bin/
   # - ls -la /usr/bin/
-  - coverage run tests.py
+  - coverage run tests/test_simple.py
+  - pytest --version
 
 after_success:
   - codecov
