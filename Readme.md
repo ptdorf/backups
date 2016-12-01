@@ -2,10 +2,6 @@
 
 Basic tool to backup mysql servers.
 
-[![Build Status](https://travis-ci.org/ptdorf/backup-mysql.svg?branch=master)](https://travis-ci.org/ptdorf/backup-mysql)
-
-[Jenkins Status](http://jenkins.dotser.com/job/backup-mysql/)
-
 
 ### Installation
 
@@ -35,3 +31,11 @@ backups:
 Now run it with
 
     backup-mysql server
+
+
+### Build status
+
+[![Build Status](https://travis-ci.org/ptdorf/backup-mysql.svg?branch=master)](https://travis-ci.org/ptdorf/backup-mysql)
+
+  - http://jenkins.dotser.com/job/backup-mysql
+  - https://travis-ci.org/ptdorf/backup-mysql
