@@ -5,5 +5,4 @@ all:
 docs:
 	cd docs && zip -r ../backup-mysql.zip .
 
-
-.PHONY: docs
+.PHONY: all docs
