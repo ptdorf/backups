@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="backup-mysql",
-    version="0.1.4",
+    version="0.1.5",
     description="Backup mysql utility",
     long_description="Backup mysql utility.",
     url="https://github.com/ptdorf/backup-mysql",
@@ -22,7 +22,7 @@ setup(
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
     ],
-    keywords="sample backup mysql",
+    keywords="backup mysql",
     packages=find_packages(exclude=["contrib", "docs", "tests"]),
     install_requires=["MySQL-python"],
     entry_points={
