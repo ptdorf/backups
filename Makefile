@@ -5,4 +5,7 @@ all:
 docs:
 	cd docs && zip -r ../build/backups-docs.zip .
 
-.PHONY: all docs
+clean:
+	rm -fr dist/ build/ *.egg-info
+
+.PHONY: all docs clean

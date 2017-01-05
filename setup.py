@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="backups",
-    version="0.1.4",
+    version="0.1.5",
     description="Database backup utilities",
     long_description="Database backup utilities.",
     author="ptdorf",
