@@ -8,12 +8,13 @@ from setuptools import setup, find_packages
 
 setup(
     name="backups",
-    version="0.1.8",
+    version="0.1.9",
     description="Database backup utilities",
     long_description="Database backup utilities.",
     author="ptdorf",
     author_email="ptdorf@gmail.com",
     url="https://github.com/ptdorf/backups",
+    download_url="https://github.com/ptdorf/backups/tarball/master",
     keywords="backup mysql",
     license="MIT",
     classifiers=[
