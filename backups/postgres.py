@@ -2,6 +2,7 @@
 import sys
 from .logging import info, debug
 
+
 def main():
   info(sys.argv)
 
