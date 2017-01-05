@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="backups",
-    version="0.1.7",
+    version="0.1.8",
     description="Database backup utilities",
     long_description="Database backup utilities.",
     author="ptdorf",
@@ -26,11 +26,16 @@ setup(
         "Programming Language :: Python :: 2.7",
     ],
     packages=find_packages(exclude=["docs", "tests"]),
-    install_requires=["MySQL-python"],
+    install_requires=[
+        "MySQL-python"
+    ],
     entry_points={
         "console_scripts": [
             "backup-mysql=backups.mysql:main",
             "backup-postgres=backups.postgres:main",
         ],
     },
+    scripts=[
+        "bin/backup-test"
+    ]
 )
