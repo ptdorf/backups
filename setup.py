@@ -1,8 +1,14 @@
 from setuptools import setup, find_packages
 
+# from codecs import open
+# from os import path
+# here = path.abspath(path.dirname(__file__))
+# with open(path.join(here, 'Readme.md'), encoding='utf-8') as f:
+#     long_description = f.read()
+
 setup(
     name="backups",
-    version="0.1.0",
+    version="0.1.4",
     description="Database backup utilities",
     long_description="Database backup utilities.",
     author="ptdorf",
@@ -24,6 +30,7 @@ setup(
     entry_points={
         "console_scripts": [
             "backup-mysql=backup.mysql:main",
+            "backup-postgres=backup.postgres:main",
         ],
     },
 )

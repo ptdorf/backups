@@ -1,16 +1,16 @@
-#!/usr/bin/env python
 import os
 import sys
 import time
 import yaml
-import logging
 import MySQLdb
+# import logging
+# import .logging
 
 
-logging.basicConfig(
-  level=logging.INFO,
-  format='%(asctime)s  %(message)s'
-)
+# logging.basicConfig(
+#   level=logging.INFO,
+#   format='%(asctime)s  %(message)s'
+# )
 
 def logging_info(message):
     now = time.strftime("%Y-%m-%d %H:%M:%S")
