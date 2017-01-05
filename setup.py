@@ -1,13 +1,14 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="backup-mysql",
-    version="0.1.6",
-    description="Backup mysql utility",
-    long_description="Backup mysql utility.",
-    url="https://github.com/ptdorf/backup-mysql",
+    name="backups",
+    version="0.1.0",
+    description="Database backup utilities",
+    long_description="Database backup utilities.",
     author="ptdorf",
     author_email="ptdorf@gmail.com",
+    url="https://github.com/ptdorf/backups",
+    keywords="backup mysql",
     license="MIT",
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -18,7 +19,6 @@ setup(
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
     ],
-    keywords="backup mysql",
     packages=find_packages(exclude=["contrib", "docs", "tests"]),
     install_requires=["MySQL-python"],
     entry_points={
