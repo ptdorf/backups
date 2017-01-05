@@ -2,3 +2,4 @@ MySQL-python
 pytest
 coverage
 codecov
+wheel
