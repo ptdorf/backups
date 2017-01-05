@@ -1,11 +1,11 @@
-# backup-mysql
+# backups
 
 Basic tool to backup mysql servers.
 
 
 ### Installation
 
-    pip install --upgrade backup-mysql
+    pip install --upgrade backups
 
 
 ### Setup
@@ -14,7 +14,7 @@ Create a `/etc/backups/backups.yaml` file with content similar to:
 
 ```yaml
 backups:
-  server:
+  acme.com:
     connection:
       type:                   mysql
       host:                   localhost
@@ -23,17 +23,17 @@ backups:
     options:
       encryption:             secret
     s3:
-      bucket:                 acme-backup-databases
-      path:                   live/mysql/<suffix>
+      bucket:                 acme-backups
+      path:                   <suffix>/live/mysql
 
 ```
 
 Now run it with
 
-    backup-mysql server
+    backup-mysql acme.com
 
 
 ### Build status
 
-  - [![Build Status](https://travis-ci.org/ptdorf/backup-mysql.svg?branch=master)](https://travis-ci.org/ptdorf/backup-mysql) https://travis-ci.org/ptdorf/backup-mysql
-  - http://jenkins.dotser.com/job/backup-mysql
+  - [![Build Status](https://travis-ci.org/ptdorf/backups.svg?branch=master)](https://travis-ci.org/ptdorf/backups) https://travis-ci.org/ptdorf/backups
+  - http://jenkins.dotser.com/job/backups
