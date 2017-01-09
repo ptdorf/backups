@@ -1,14 +1,8 @@
 from setuptools import setup, find_packages
 
-# from codecs import open
-# from os import path
-# here = path.abspath(path.dirname(__file__))
-# with open(path.join(here, 'Readme.md'), encoding='utf-8') as f:
-#     long_description = f.read()
-
 setup(
     name="backups",
-    version="0.1.9",
+    version="0.1.10",
     description="Database backup utilities",
     long_description="Database backup utilities.",
     author="ptdorf",
