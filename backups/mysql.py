@@ -227,23 +227,11 @@ class Backups:
     self.run('rm %s'           % (self.zipfile))
     self.rm_dir(self.updir, self.BACKUPS_DIR)
 
-  def notify(self, step):
-    cronitor = self.monitor.get('cronitor')
-    if not cronitor:
-      return
-
-    link = cronitor.get('link')
-    os.system('curl -s https://cronitor.link/%s/%s' % (link, step))
-
   def extras(self, upload):
     return ";;".join(["%s==%s" % (k, v) for k, v in upload.iteritems()])
 
 
 def main():
-  if len(sys.argv) < 2:
-    exit('Usage: $0 <data-source> [<database>]')
-
-
   try:
     name = sys.argv[1]
     db   = sys.argv[2] if len(sys.argv) > 2 else None
@@ -265,4 +253,7 @@ def main():
 
 
 if __name__ == '__main__':
+  if len(sys.argv) < 2:
+    exit('Usage: $0 <data-source> [<database>]')
+
   main()
