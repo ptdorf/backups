@@ -1,6 +1,6 @@
 # backups
 
-[![Build Status](https://travis-ci.org/ptdorf/backups.svg?branch=master)](https://travis-ci.org/ptdorf/backups) https://travis-ci.org/ptdorf/backups
+[![Build Status](https://travis-ci.org/ptdorf/backups.svg?branch=master)](https://travis-ci.org/ptdorf/backups)
 
 Basic tool to backup mysql servers.
 
