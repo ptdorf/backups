@@ -1,5 +1,7 @@
 # backups
 
+[![Build Status](https://travis-ci.org/ptdorf/backups.svg?branch=master)](https://travis-ci.org/ptdorf/backups) https://travis-ci.org/ptdorf/backups
+
 Basic tool to backup mysql servers.
 
 
@@ -31,10 +33,3 @@ backups:
 Now run it with
 
     backup-mysql acme.com
-
-
-### Build status
-
-  - [![Build Status](https://travis-ci.org/ptdorf/backups.svg?branch=master)](https://travis-ci.org/ptdorf/backups) https://travis-ci.org/ptdorf/backups
-  - http://jenkins.dotser.com/job/backups
-
