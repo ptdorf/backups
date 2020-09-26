@@ -13,7 +13,7 @@ backups:
     upload:
       s3:
         bucket: jpedro-database-dumps
-        path:   tests/<suffix>
+        path:   tests
 
   dotser:
     connection:

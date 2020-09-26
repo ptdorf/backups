@@ -58,6 +58,10 @@ backups:
       host:         acme.com
       username:     backups
       password:     password
+    upload:
+      s3:
+        bucket: acme-backups
+        path:   databases
     options:
       # By default it will create a single dump file for each database found
       # Uncomment the options below to change this

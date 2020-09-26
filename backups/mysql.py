@@ -86,10 +86,9 @@ class Mysql:
 
 class Backups:
 
-  def __init__(self, file):
+  def __init__(self, file, dryrun):
     self.file = file
-    # self.dryrun = dryrun
-    exit(55)
+    self.dryrun = dryrun
 
     if not os.path.isfile(self.file):
       raise RuntimeError(f"File '{self.file}' doesn't exist.")
@@ -216,9 +215,9 @@ class Backups:
     if self.dryrun:
       return
 
-    # code = os.system(cmd)
-    # if code != 0:
-    #   raise RuntimeError(f"Command '\033[31;1m{cmd}\033[0m' failed.")
+    code = os.system(cmd)
+    if code != 0:
+      raise RuntimeError(f"Command '\033[31;1m{cmd}\033[0m' failed.")
 
 
   def compress(self):
@@ -252,18 +251,17 @@ class Backups:
       logging_info("Skipping uploading")
       return
 
+    s3_bucket = self.s3.get("bucket")
+    s3_path   = self.s3.get("path", self.name)
+    s3_path   = s3_path.replace("<suffix>", self.name)
     s3_dir    = os.path.dirname(self.zip_file)
     s3_dir    = s3_dir.replace("/tmp/backups/", "")
     s3_name   = os.path.basename(self.zip_file)
-    s3_bucket = self.s3.get("bucket")
-    s3_path   = self.s3.get("path")
-    s3_path   = s3path.replace("<suffix>", self.name)
     s3_folder = "s3://%s/%s/%s" % (s3_bucket, s3_path, s3_dir)
 
     self.s3_file = "%s/%s" % (s3_folder, s3_name)
 
-    # logging_info("Uploading to %s" % (self.s3file))
-    logging_info("Uploading")
+    logging_info(f"Uploading \033[32;1m{self.zip_file}\033[0m to \033[32;1m{self.s3_file}\033[0m")
     cmd = "aws s3 cp %s %s/ >%s" % (self.zip_file, s3_folder, self.options.get("errors", "/dev/null"))
     self.exec(cmd)
 
