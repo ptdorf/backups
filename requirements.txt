@@ -1,5 +1,9 @@
-MySQL-python
+mysqlclient
 pytest
 coverage
 codecov
 wheel
+pyyaml
+docopt
+click
+fire

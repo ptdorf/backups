@@ -12,7 +12,7 @@ after_success:
   - codecov
 
 notifications:
-  email: 
+  email:
     recipients:
       - ptdorf@gmail.com
   on_failure: always

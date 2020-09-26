@@ -2,14 +2,14 @@ from setuptools import setup, find_packages
 
 setup(
     name="backups",
-    version="0.1.12",
+    version="0.2.0",
     description="Database backup utilities",
     long_description="Database backup utilities.",
     author="ptdorf",
     author_email="ptdorf@gmail.com",
     url="https://github.com/ptdorf/backups",
     download_url="https://github.com/ptdorf/backups/tarball/master",
-    keywords="backup mysql",
+    keywords="backups backup mysql postgres",
     license="MIT",
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -31,6 +31,6 @@ setup(
         ],
     },
     scripts=[
-        "bin/backup-test"
+        "bin/backups-check",
     ]
 )
