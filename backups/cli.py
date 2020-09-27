@@ -1,20 +1,20 @@
 """
-Backups mysql databases and server
+Backups mysql databases
 
 Usage:
   backups env
   backups ls                    [--file FILE] [--verbose]
-  backups show NAME             [--file FILE] [--verbose]
-  backups databases NAME        [--file FILE] [--verbose]
-  backups run NAME              [--file FILE] [--verbose] [--dryrun]
-  backups run NAME [DATABASE]   [--file FILE] [--verbose] [--dryrun]
+  backups show JOB              [--file FILE] [--verbose]
+  backups databases JOB         [--file FILE] [--verbose]
+  backups run JOB               [--file FILE] [--verbose] [--dryrun]
+  backups run JOB [DATABASE]    [--file FILE] [--verbose] [--dryrun]
 
 Commands:
   env         Show the current environment
-  ls          Prints the backups names
-  show        Prints the configuration for a named backup
-  databases   Lists all databases on a name backup server
-  run         Runs the backup for a config
+  ls          Prints the backup job names
+  show        Prints the configuration for a job
+  databases   Lists all databases on a backup job server
+  run         Runs the backup for a job
 
 Options:
   -f --file FILE    The backups config file (default /etc/backups/backups.yaml)
@@ -36,8 +36,9 @@ Check https://github.com/ptdorf/backups#backups for more info
 import os
 import yaml
 import docopt
-import runner
 
+import version
+import runner
 
 BACKUPS_FILE        = os.environ.get("BACKUPS_FILE", "/etc/backups/backups.yaml")
 BACKUPS_DUMPS_DIR   = os.environ.get("BACKUPS_DUMPS_DIR", "/tmp/backups")
@@ -47,33 +48,35 @@ BACKUPS_STDERR_FILE = os.environ.get("BACKUPS_STDERR_FILE", "/tmp/backups.err")
 
 
 def main():
-  args = docopt.docopt(__doc__, version="0.2.0")
+  args = docopt.docopt(__doc__, version=version.VERSION)
   if args["--verbose"]:
+    print("Backups arguments")
     for k, v in args.items():
-      print(f"\033[38;5;242m{k}: {v}\033[0m")
+      print(f"    \033[38;5;242m{k}: {v}\033[0m")
 
   file = args['--file'] if args['--file'] else BACKUPS_FILE
   run = runner.Runner(file, args['--dryrun'])
+  run.verbose = args["--verbose"]
 
   if args["env"]:
     print("Backups environment")
     print("    File          ", file)
-    print("    Dump dir      ", BACKUPS_DUMPS_DIR)
-    print("    Mysql dump    ", BACKUPS_MYSQL_DUMP)
+    print("    Dumps dir     ", BACKUPS_DUMPS_DIR)
+    print("    Mysqldump     ", BACKUPS_MYSQL_DUMP)
     print("    Log level     ", BACKUPS_LOG_LEVEL)
-    print("    Std err file  ", BACKUPS_STDERR_FILE)
+    print("    Stderr        ", BACKUPS_STDERR_FILE)
 
   if args["ls"]:
     run.ls()
 
   elif args["show"]:
-    run.show(args["NAME"])
+    run.show(args["JOB"])
 
   elif args["databases"]:
-    run.databases(args["NAME"])
+    run.databases(args["JOB"])
 
   elif args["run"]:
-    report = run.run(args["NAME"], args["DATABASE"])
+    report = run.run(args["JOB"], args["DATABASE"])
     print("\nREPORT")
     print(yaml.dump(report, sort_keys=False))
 

@@ -16,7 +16,7 @@ def _size(file):
     "human": human,
   }
 
-def _paths(context, ext):
+def _details(context, ext):
   base = os.path.dirname(context.dump)
   path = os.path.basename(context.dump)
   file = f"{context.dump}.{ext}"
@@ -26,9 +26,9 @@ def _paths(context, ext):
 
 def compress_zip(config, context):
   password = config.get("password", "biteme")
-  base, path, file = _paths(context, "zip")
+  base, path, file = _details(context, "zip")
 
-  logger.info(f"Compressing {system.green(file)}")
+  logger.info(f"Compressing into {system.green(file)}")
   command = f"cd {base} && zip --password {password} -r {file} {path} >{context.stderr} 2>&1"
   system.exec(command)
 
@@ -40,9 +40,9 @@ def compress_zip(config, context):
 
 
 def compress_tgz(config, context):
-  base, path, file = _paths(context, "tgz")
+  base, path, file = _details(context, "tgz")
 
-  logger.info(f"Compressing {system.green(file)}")
+  logger.info(f"Compressing into {system.green(file)}")
   command = f"cd {base} && tar -czvf {file} {path} >{context.stderr} 2>&1"
   system.exec(command)
 

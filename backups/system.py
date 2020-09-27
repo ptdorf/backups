@@ -1,10 +1,13 @@
 import os
 import logger
 
-dryrun = False
+dryrun  = False
+verbose = False
 
 def exec(command):
-  logger.info(f"\033[38;5;242mRunning '{command}'\033[0m")
+  if verbose:
+    logger.info(f"\033[38;5;242mRunning '{command}'\033[0m")
+
   if dryrun:
     return
 
@@ -31,6 +34,7 @@ def cleanup(start, stop):
     try:
       exec(f"rmdir {start}")
     except Exception as e:
-      print(e); exit(55)
+      print(f"Failed to remove dir {start}")
+      return
 
     start = os.path.dirname(start)

@@ -4,8 +4,8 @@ import system
 
 
 def _files(config, context):
-  prefix  = config.get("prefix", context.name)
-  prefix  = prefix.replace("<name>", context.name)
+  prefix  = config.get("prefix", context.job)
+  prefix  = prefix.replace("<name>", context.job)
   base    = os.path.dirname(context.dump)
   subpath = base.replace(context.dumps + "/", "")
   folder  = f"{prefix}/{subpath}"
@@ -28,7 +28,7 @@ def upload_s3(config, context):
     name = os.path.basename(file)
     dest = f"s3://{bucket}/{folder}/{name}"
 
-    logger.info(f"Uploading to S3 {system.green(file)}")
+    logger.info(f"Uploading to {system.green(dest)}")
     command = f"aws s3 cp {file} {dest} >{context.stderr} 2>&1"
     system.exec(command)
     uploads.append(dest)
@@ -47,7 +47,7 @@ def upload_gs(config, context):
     name = os.path.basename(file)
     dest = f"gs://{bucket}/{folder}/{name}"
 
-    logger.info(f"Uploading to GS {system.green(file)}")
+    logger.info(f"Uploading to {system.green(dest)}")
     command = f"gsutil cp {file} {dest} >{context.stderr} 2>&1"
     system.exec(command)
     uploads.append(dest)

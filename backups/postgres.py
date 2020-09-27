@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from .logging import info, debug
+import logger
 
 
 def main():

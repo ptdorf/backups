@@ -20,6 +20,7 @@ BACKUPS_STDERR    = os.environ.get("BACKUPS_STDERR", "/tmp/backups.err")
 class Runner:
 
   context = context.Context()
+  verbose = False
 
   def __init__(self, file, dryrun):
     system.dryrun = dryrun
@@ -39,15 +40,17 @@ class Runner:
       raise RuntimeError(f"File '{self.file}' doesn't have a backups top key.")
 
     self.backups = self.data["backups"]
+    if not "jobs" in self.backups.keys():
+      raise RuntimeError(f"File '{self.file}' doesn't have a jobs defined.")
 
 
-  def load(self, name):
-    self.context.name = name
+  def load(self, job):
+    if not job in self.backups["jobs"].keys():
+      raise RuntimeError(f"Backup job '{job}' doesn't exist.")
 
-    if not self.context.name in self.backups.keys():
-      raise RuntimeError(f"Backup '{self.context.name}' doesn't exist.")
+    self.context.job = job
 
-    self.backup  = self.backups[self.context.name]
+    self.backup  = self.backups["jobs"][job]
     self.options = self.backup.get("options", {})
     self.mysql   = mysql.Mysql(self.backup["connection"])
 
@@ -57,25 +60,27 @@ class Runner:
 
 
   def ls(self):
-    for name in self.backups:
-      print(name)
+    for job in self.backups["jobs"]:
+      print(job)
 
 
-  def show(self, name):
-    self.load(name)
-    print(yaml.dump(self.backup))
+  def show(self, job):
+    self.load(job)
+    print(yaml.dump(self.backup, sort_keys=False))
 
 
-  def databases(self, name):
-    self.load(name)
+  def databases(self, job):
+    self.load(job)
     rows = self.mysql.query("SHOW DATABASES")
     for i in rows:
       print(i["Database"])
 
 
-  def run(self, name, database):
-    self.load(name)
-    self.prepare(name, database)
+  def run(self, job, database):
+    system.verbose = self.verbose
+
+    self.load(job)
+    self.prepare(job, database)
 
     if database:
       self.dump_database(database)
@@ -99,15 +104,15 @@ class Runner:
     return report
 
 
-  def prepare(self, name, database=None):
+  def prepare(self, job, database=None):
     date = time.strftime("%Y/%m/%d")
     now  = time.strftime("%Y-%m-%d-%H%M%S")
-    job  = name
+    name = job
 
     if database:
-      job = name + "-" + database
+      name = job + "-" + database
 
-    self.context.dump = f"{self.context.dumps}/{job}/{date}/{now}"
+    self.context.dump = f"{self.context.dumps}/{name}/{date}/{now}"
 
     logger.info(f"Using dir {system.green(self.context.dump)}")
     system.exec(f"mkdir -p {self.context.dump}")
@@ -136,16 +141,19 @@ class Runner:
 
 
   def dump_databases(self, databases):
-    logger.info("Dumping individual databases")
+    logger.info("Dumping databases")
 
-    if databases is []:
+    ignore  = self.options.get("ignore", [])
+    ignored = ignore + ["information_schema", "performance_schema", "sys"]
+
+    if len(databases) < 1:
       rows = self.mysql.query("SELECT SCHEMA_NAME db FROM information_schema.SCHEMATA")
       for row in rows:
         db = row["db"]
-        if db == "information_schema":
+        if db in ignored:
+          logger.info(f"Ignoring {system.green(db)}")
           continue
-        if db == "performance_schema":
-          continue
+
         databases.append(db)
 
     for database in databases:
@@ -203,6 +211,6 @@ class Runner:
 
     start = os.path.dirname(self.context.dump)
     stop = self.context.dumps
-    logger.info(f"Cleaning from {system.green(start)} to {system.green(stop)}")
+    logger.info(f"Cleaning from {system.green(start)} until {system.green(stop)}")
     system.exec(f"rm -frv {self.context.dump}* >{self.context.stderr} 2>&1")
     system.cleanup(start, stop)

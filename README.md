@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/ptdorf/backups.svg?branch=master)](https://travis-ci.org/ptdorf/backups)
 
-Basic tool to backup mysql servers.
+Basic tool to backup mysql databases.
 
 
 ## Installation
@@ -13,34 +13,37 @@ Basic tool to backup mysql servers.
 ## Usage
 
 ```
-$ backups run local --help
-Backups mysql databases and server
+$ backups --help
+Backups mysql databases
 
 Usage:
+  backups env
   backups ls                    [--file FILE] [--verbose]
-  backups show NAME             [--file FILE] [--verbose]
-  backups databases NAME        [--file FILE] [--verbose]
-  backups run NAME              [--file FILE] [--verbose] [--dryrun]
-  backups run NAME [DATABASE]   [--file FILE] [--verbose] [--dryrun]
+  backups show JOB              [--file FILE] [--verbose]
+  backups databases JOB         [--file FILE] [--verbose]
+  backups run JOB               [--file FILE] [--verbose] [--dryrun]
+  backups run JOB [DATABASE]    [--file FILE] [--verbose] [--dryrun]
 
 Commands:
-  ls          Prints the backups names
-  show        Prints the configuration for a named backup
-  databases   Lists all databases on a name backup server
-  run         Runs the backup for a config
+  env         Show the current environment
+  ls          Prints the backup job names
+  show        Prints the configuration for a job
+  databases   Lists all databases on a backup job server
+  run         Runs the backup for a job
 
 Options:
-  -f --file FILE    The backups config file [default: /etc/backups/backups.yaml]
+  -f --file FILE    The backups config file (default /etc/backups/backups.yaml)
   -d --dryrun       Just prints the commands but doesn't execute them
   -v --verbose      Adds verbosity
   -h --help         Prints this help
      --version      Prints the current version
 
 Environment variables:
-  BACKUPS_FILE          Use this file instead of /etc/backups/backups.yaml
-  BACKUPS_DUMPS_DIR     Use this directory instead of /tmp/backups
-  BACKUPS_MYSQLDUMP     Use this binary instead of mysqldump from the $PATH
-
+  BACKUPS_FILE          The backups file (default /etc/backups/backups.yaml)
+  BACKUPS_DUMPS_DIR     The dumps directory (default /tmp/backups)
+  BACKUPS_MYSQL_DUMP    The mysqldump binary (default picked from $PATH)
+  BACKUPS_LOG_LEVEL     Default INFO
+  BACKUPS_STDERR_FILE   The stderr log file (default /tmp/backups.err)
 
 Check https://github.com/ptdorf/backups#backups for more info
 ```
@@ -48,34 +51,42 @@ Check https://github.com/ptdorf/backups#backups for more info
 
 ## Setup
 
-Create a `/etc/backups/backups.yaml` file with content similar to:
+Create a `backups.yaml` file with content similar to:
 
 ```yaml
 backups:
-  acme:
-    connection:
-      type:         mysql
-      host:         acme.com
-      username:     backups
-      password:     password
-    upload:
-      s3:
+  jobs:
+    acme:
+      connection:
+        type:         mysql
+        host:         acme.com
+        username:     backups
+        password:     password
+      options:
+        server: true  # Dumps the entire server into a single file
+        # By default it will create a single dump file for each database found
+        # Uncomment to only backups specific databases (one on each file)
+        # databases:
+        # - main_db
+        # - other_db
+      upload:
+      - type: s3
         bucket: acme-backups
         path:   databases
-    options:
-      # By default it will create a single dump file for each database found
-      # Uncomment the options below to change this
-      # database:     main_db   # Uncomment to dump this single database
-      # server:       true      # Uncomment to dump the server into a single file
-      encryption
-        pasword:    secret
-
+      compression:
+      - type: zip
+        pasword: secret
+      notifications:
+      - type: slack
+        webhook: https://hooks.slack.com/services/x/y/z
+        channel: "#backups"
 ```
 
 Now run it with
 
-    backup-mysql run acme
+    backup-mysql run acme --file backups.yaml
 
 Or if you placed the backup file in some other place:
 
-    backup-mysql run acme --file examples/mysql.yaml
+    export BACKUPS_FILE=backups.yaml
+    backup-mysql run acme

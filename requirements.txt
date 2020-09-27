@@ -6,3 +6,4 @@ wheel
 pyyaml
 docopt
 requests
+twine

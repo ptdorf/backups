@@ -4,7 +4,7 @@ class Context(data.Object):
 
   def __init__(self):
     self.file   = None
-    self.name   = None
+    self.job    = None
     self.dumps  = None
     self.dump   = None
     self.stderr = None
