@@ -1,0 +1,208 @@
+import os
+import time
+import yaml
+
+import logger
+import system
+import context
+import mysql
+import compress
+import upload
+import notify
+
+
+BACKUPS_DUMPS     = os.environ.get("BACKUPS_DUMPS", "/tmp/backups")
+BACKUPS_MYSQLDUMP = os.environ.get("BACKUPS_MYSQLDUMP", "mysqldump")
+BACKUPS_LOGLEVEL  = os.environ.get("BACKUPS_LOGLEVEL", "INFO")
+BACKUPS_STDERR    = os.environ.get("BACKUPS_STDERR", "/tmp/backups.err")
+
+
+class Runner:
+
+  context = context.Context()
+
+  def __init__(self, file, dryrun):
+    system.dryrun = dryrun
+
+    self.context.file   = file
+    self.context.dryrun = dryrun
+    self.context.dumps  = BACKUPS_DUMPS
+    self.context.stderr = BACKUPS_STDERR
+
+    if not os.path.isfile(self.context.file):
+      raise RuntimeError(f"File '{self.context.file}' doesn't exist.")
+
+    with open(self.context.file, "r") as f:
+      self.data = yaml.safe_load(f)
+
+    if not "backups" in self.data.keys():
+      raise RuntimeError(f"File '{self.file}' doesn't have a backups top key.")
+
+    self.backups = self.data["backups"]
+
+
+  def load(self, name):
+    self.context.name = name
+
+    if not self.context.name in self.backups.keys():
+      raise RuntimeError(f"Backup '{self.context.name}' doesn't exist.")
+
+    self.backup  = self.backups[self.context.name]
+    self.options = self.backup.get("options", {})
+    self.mysql   = mysql.Mysql(self.backup["connection"])
+
+
+  def dump(self):
+    print(yaml.dump(self.data, sort_keys=False))
+
+
+  def ls(self):
+    for name in self.backups:
+      print(name)
+
+
+  def show(self, name):
+    self.load(name)
+    print(yaml.dump(self.backup))
+
+
+  def databases(self, name):
+    self.load(name)
+    rows = self.mysql.query("SHOW DATABASES")
+    for i in rows:
+      print(i["Database"])
+
+
+  def run(self, name, database):
+    self.load(name)
+    self.prepare(name, database)
+
+    if database:
+      self.dump_database(database)
+
+    elif self.options.get("server", False) == True:
+      self.dump_server()
+
+    else:
+      databases = self.options.get("databases", [])
+      self.dump_databases(databases)
+
+    self.compress()
+    self.upload()
+    self.cleanup()
+    self.notify()
+
+    report = {
+      "context":  self.context
+    }
+
+    return report
+
+
+  def prepare(self, name, database=None):
+    date = time.strftime("%Y/%m/%d")
+    now  = time.strftime("%Y-%m-%d-%H%M%S")
+    job  = name
+
+    if database:
+      job = name + "-" + database
+
+    self.context.dump = f"{self.context.dumps}/{job}/{date}/{now}"
+
+    logger.info(f"Using dir {system.green(self.context.dump)}")
+    system.exec(f"mkdir -p {self.context.dump}")
+
+
+  def get_mysql_dump(self):
+    return "%s -alv --host=%s --user=%s --password=%s --master-data=%i --single-transaction" % \
+      (
+        BACKUPS_MYSQLDUMP,
+        self.backup["connection"].get("host", ""),
+        self.backup["connection"].get("username", ""),
+        self.backup["connection"].get("password", ""),
+        self.options.get("master-data", 1),
+      )
+
+
+  def dump_server(self):
+    logger.info("Dumping the server into a single file")
+
+    sql_file = "%s/%s%s.sql" % (self.context.dump, self.options.get("prefix", ""), "all-databases")
+    err_file = self.options.get("stderr", self.context.stderr)
+    command  = f"{self.get_mysql_dump()} --all-databases > {sql_file} 2>{err_file}"
+
+    system.exec(command)
+
+
+
+  def dump_databases(self, databases):
+    logger.info("Dumping individual databases")
+
+    if databases is []:
+      rows = self.mysql.query("SELECT SCHEMA_NAME db FROM information_schema.SCHEMATA")
+      for row in rows:
+        db = row["db"]
+        if db == "information_schema":
+          continue
+        if db == "performance_schema":
+          continue
+        databases.append(db)
+
+    for database in databases:
+      self.dump_database(database)
+
+
+  def dump_database(self, database):
+    logger.info(f"Dumping database {system.green(database)}")
+
+    sql_file = "%s/%s%s.sql" % (self.context.dump, self.options.get("prefix", ""), database)
+    err_file = self.options.get("stderr", self.context.stderr)
+    command  = f"{self.get_mysql_dump()} --databases {database} > {sql_file} 2>{err_file}"
+
+    system.exec(command)
+
+
+  def compress(self):
+    methods = self.backup.get("compressions", [])
+    if methods is []:
+      logger.info("Skipping compressions")
+      return
+
+    for config in methods:
+      f = getattr(compress, "compress_" + config["type"])
+      f(config, self.context)
+
+
+  def upload(self):
+    methods = self.backup.get("uploads", [])
+    if methods is []:
+      logger.info("Skipping uploads")
+      return
+
+    for config in methods:
+      f = getattr(upload, "upload_" + config["type"])
+      f(config, self.context)
+
+
+  def notify(self):
+    methods = self.backup.get("notifications", [])
+    if methods is []:
+      logger.info("Skipping notifications")
+      return
+
+    for config in methods:
+      f = getattr(notify, "notify_" + config["type"])
+      f(config, self.context)
+
+
+  def cleanup(self):
+    clean = self.options.get("clean", "all")
+    if not clean:
+      logger.info(f"Skip cleaning {system.green(self.context.dump)} (clean: {clean})")
+      return
+
+    start = os.path.dirname(self.context.dump)
+    stop = self.context.dumps
+    logger.info(f"Cleaning from {system.green(start)} to {system.green(stop)}")
+    system.exec(f"rm -frv {self.context.dump}* >{self.context.stderr} 2>&1")
+    system.cleanup(start, stop)
