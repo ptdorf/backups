@@ -26,8 +26,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "backup-mysql=backups.mysql:main",
-            "backup-postgres=backups.postgres:main",
+            "backups=backups.cli:main",
         ],
     },
     scripts=[

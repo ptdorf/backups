@@ -5,5 +5,4 @@ codecov
 wheel
 pyyaml
 docopt
-click
-fire
+requests
