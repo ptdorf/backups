@@ -1,0 +1,28 @@
+backups:
+  jobs:
+    acme:
+      connection:
+        type:       mysql
+        host:       acme.com
+        username:   backups
+        password:   password
+      options:
+        ignore:
+        - test_db
+
+      compress:
+      - type: zip
+        password: secret
+
+      upload:
+      - type: s3
+        bucket: acme-backups
+        prefix: databases
+      - type: gs
+        enabled: false
+        bucket: acme-backups
+        prefix: databases
+
+      notify:
+      - type: slack
+        webhook: https://hooks.slack.com/services/x/y/z
