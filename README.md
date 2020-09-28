@@ -84,9 +84,9 @@ backups:
 
 Now run it with
 
-    backup-mysql run acme --file backups.yaml
+    backups run acme --file backups.yaml
 
 Or if you placed the backup file in some other place:
 
     export BACKUPS_FILE=backups.yaml
-    backup-mysql run acme
+    backups run acme
