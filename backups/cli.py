@@ -8,6 +8,8 @@ Usage:
   backups databases JOB         [--file FILE] [--verbose]
   backups run JOB               [--file FILE] [--verbose] [--dryrun]
   backups run JOB [DATABASE]    [--file FILE] [--verbose] [--dryrun]
+  backups help
+  backups version
 
 Commands:
   env         Show the current environment
@@ -49,6 +51,14 @@ BACKUPS_STDERR     = os.environ.get("BACKUPS_STDERR", "/tmp/backups.err")
 
 def main():
   args = docopt.docopt(__doc__, version=version.VERSION)
+  if args["version"]:
+    print(version.VERSION)
+    exit()
+
+  if args["help"]:
+    print(__doc__)
+    exit()
+
   if args["--verbose"]:
     print("Backups arguments")
     for k, v in args.items():
