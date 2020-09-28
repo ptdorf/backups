@@ -70,9 +70,9 @@ def main():
     print("Backups environment")
     print("    File          ", file)
     print("    Dumps dir     ", BACKUPS_DUMPS_DIR)
-    print("    Mysqldump     ", BACKUPS_MYSQL_DUMP)
+    print("    Mysqldump     ", BACKUPS_MYSQLDUMP)
     print("    Log level     ", BACKUPS_LOG_LEVEL)
-    print("    Stderr        ", BACKUPS_STDERR_FILE)
+    print("    Stderr        ", BACKUPS_STDERR)
     print("    Version       ", version.VERSION)
     exit()
 

@@ -1,10 +1,5 @@
 .
 
-# docopt
-# pyyaml>=5.3.1
-# mysqlclient
-# requests
-
 pytest
 coverage
 codecov
