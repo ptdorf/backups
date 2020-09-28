@@ -2,9 +2,6 @@ language: python
 sudo: false
 
 script:
-# - echo $PATH
-# - ls -la /usr/local/bin/
-# - ls -la /usr/bin/
 - pip install .
 - py.test
 - coverage run tests/test_*.py
