@@ -9,7 +9,7 @@ script:
 - backups help
 - backups version
 - backups ls
-- backups show
+- backups show acme
 - backups run acme --dryrun
 
 after_success:
