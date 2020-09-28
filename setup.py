@@ -28,7 +28,7 @@ setup(
   packages=find_packages(exclude=["docs", "tests"]),
   install_requires=[
     "docopt",
-    "pyyaml==5.3.1",
+    "pyyaml>=5.3.1",
     "mysqlclient",
     "requests",
   ],

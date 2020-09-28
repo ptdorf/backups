@@ -3,11 +3,11 @@ import requests
 
 
 def _size(context):
-  if context.compressions is []:
+  if context.compress is []:
     return "-"
 
   size = ""
-  for compression in context.compressions:
+  for compression in context.compress:
     size = f"{size}{compression['size']['human']}, "
 
   size = f"{size[0:-2]}"
@@ -35,7 +35,7 @@ def notify_slack(config, context):
       % (res.status_code, res.text)
     )
 
-  context.notifications.append({
+  context.notify.append({
     "type": "slack",
     "text": text,
     "status": res.status_code,

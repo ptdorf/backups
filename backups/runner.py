@@ -171,9 +171,9 @@ class Runner:
 
 
   def compress(self):
-    methods = self.backup.get("compressions", [])
+    methods = self.backup.get("compress", [])
     if methods is []:
-      logger.info("Skipping compressions")
+      logger.info("Skipping compress")
       return
 
     for config in methods:
@@ -182,7 +182,7 @@ class Runner:
 
 
   def upload(self):
-    methods = self.backup.get("uploads", [])
+    methods = self.backup.get("upload", [])
     if methods is []:
       logger.info("Skipping uploads")
       return
@@ -193,9 +193,9 @@ class Runner:
 
 
   def notify(self):
-    methods = self.backup.get("notifications", [])
+    methods = self.backup.get("notify", [])
     if methods is []:
-      logger.info("Skipping notifications")
+      logger.info("Skipping notify")
       return
 
     for config in methods:

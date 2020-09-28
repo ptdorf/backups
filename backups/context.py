@@ -10,6 +10,6 @@ class Context(data.Object):
     self.stderr = None
     self.dryrun = None
 
-    self.compressions  = []
-    self.uploads       = []
-    self.notifications = []
+    self.compress = []
+    self.upload   = []
+    self.notify   = []

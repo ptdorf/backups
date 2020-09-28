@@ -69,14 +69,14 @@ backups:
         # databases:
         # - main_db
         # - other_db
+      compress:
+      - type: zip
+        pasword: secret
       upload:
       - type: s3
         bucket: acme-backups
         path:   databases
-      compression:
-      - type: zip
-        pasword: secret
-      notifications:
+      notify:
       - type: slack
         webhook: https://hooks.slack.com/services/x/y/z
         channel: "#backups"

@@ -33,7 +33,7 @@ def compress_zip(config, context):
   command = f"cd {base} && zip --password {password} -r {file} {path} >{context.stderr} 2>&1"
   system.exec(command)
 
-  context.compressions.append({
+  context.compress.append({
     "type": "zip",
     "file": file,
     "size": _size(file),
@@ -47,7 +47,7 @@ def compress_tgz(config, context):
   command = f"cd {base} && tar -czvf {file} {path} >{context.stderr} 2>&1"
   system.exec(command)
 
-  context.compressions.append({
+  context.compress.append({
     "type": "tgz",
     "file": file,
     "size": _size(file),

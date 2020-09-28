@@ -34,7 +34,7 @@ def upload_s3(config, context):
     system.exec(command)
     uploads.append(dest)
 
-  context.uploads.append({
+  context.upload.append({
     "type": "s3",
     "files": uploads,
   })
@@ -53,7 +53,7 @@ def upload_gs(config, context):
     system.exec(command)
     uploads.append(dest)
 
-  context.uploads.append({
+  context.upload.append({
     "type": "gs",
     "files": uploads,
   })
