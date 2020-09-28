@@ -3,9 +3,9 @@ Backups mysql databases
 
 Usage:
   backups env
-  backups ls                    [--file FILE] [--verbose]
-  backups show JOB              [--file FILE] [--verbose]
-  backups databases JOB         [--file FILE] [--verbose]
+  backups ls                    [--file FILE]
+  backups show JOB              [--file FILE]
+  backups databases JOB         [--file FILE]
   backups run JOB               [--file FILE] [--verbose] [--dryrun]
   backups run JOB [DATABASE]    [--file FILE] [--verbose] [--dryrun]
   backups help
