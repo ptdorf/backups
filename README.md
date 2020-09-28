@@ -86,7 +86,7 @@ Now run it with
 
     backups run acme --file backups.yaml
 
-Or if you placed the backup file in some other place:
+You can use the `BACKUPS_FILE` env var instead:
 
     export BACKUPS_FILE=backups.yaml
     backups run acme

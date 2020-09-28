@@ -119,7 +119,7 @@ class Runner:
 
 
   def get_mysql_dump(self):
-    return "%s -alv --host=%s --user=%s --password=%s --master-data=%i --single-transaction" % \
+    return "%s -alv --host=%s --user=%s --password=%s --master-data=%i --triggers --events --dump-date --debug-info --single-transaction" % \
       (
         BACKUPS_MYSQLDUMP,
         self.backup["connection"].get("host", ""),
