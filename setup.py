@@ -27,10 +27,10 @@ setup(
   ],
   packages=find_packages(exclude=["docs", "tests"]),
   install_requires=[
-    "mysqlclient",
     "docopt",
+    "pyyaml==5.3.1",
+    "mysqlclient",
     "requests",
-    "pyyaml",
   ],
   entry_points={
     "console_scripts": [

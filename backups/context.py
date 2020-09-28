@@ -1,4 +1,4 @@
-import data
+from . import data
 
 class Context(data.Object):
 

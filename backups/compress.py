@@ -1,6 +1,7 @@
 import os
-import system
-import logger
+
+from . import system
+from . import logger
 
 
 def _size(file):

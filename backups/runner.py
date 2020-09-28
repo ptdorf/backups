@@ -2,13 +2,13 @@ import os
 import time
 import yaml
 
-import logger
-import system
-import context
-import mysql
-import compress
-import upload
-import notify
+from . import logger
+from . import system
+from . import context
+from . import mysql
+from . import compress
+from . import upload
+from . import notify
 
 
 BACKUPS_DUMPS     = os.environ.get("BACKUPS_DUMPS", "/tmp/backups")
@@ -125,7 +125,7 @@ class Runner:
         self.backup["connection"].get("host", ""),
         self.backup["connection"].get("username", ""),
         self.backup["connection"].get("password", ""),
-        self.options.get("master-data", 1),
+        self.options.get("master-data", 0),
       )
 
 

@@ -1,6 +1,7 @@
 import os
-import logger
-import system
+
+from . import logger
+from . import system
 
 
 def _files(config, context):

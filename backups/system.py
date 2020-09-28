@@ -1,5 +1,6 @@
 import os
-import logger
+
+from . import logger
 
 dryrun  = False
 verbose = False

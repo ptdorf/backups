@@ -12,8 +12,10 @@ release:
 	python3 -m twine upload dist/*
 
 test:
-	python3 -m twine upload --repository testpypi dist/*
 	pytest
+	pip install .
+	backups --version
+	python3 -m twine upload --repository testpypi dist/*
 
 docs:
 	mkdir -p build

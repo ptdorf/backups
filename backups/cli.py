@@ -37,8 +37,8 @@ import os
 import yaml
 import docopt
 
-import version
-import runner
+from . import version
+from . import runner
 
 BACKUPS_FILE        = os.environ.get("BACKUPS_FILE", "/etc/backups/backups.yaml")
 BACKUPS_DUMPS_DIR   = os.environ.get("BACKUPS_DUMPS_DIR", "/tmp/backups")
@@ -55,8 +55,6 @@ def main():
       print(f"    \033[38;5;242m{k}: {v}\033[0m")
 
   file = args['--file'] if args['--file'] else BACKUPS_FILE
-  run = runner.Runner(file, args['--dryrun'])
-  run.verbose = args["--verbose"]
 
   if args["env"]:
     print("Backups environment")
@@ -65,6 +63,11 @@ def main():
     print("    Mysqldump     ", BACKUPS_MYSQL_DUMP)
     print("    Log level     ", BACKUPS_LOG_LEVEL)
     print("    Stderr        ", BACKUPS_STDERR_FILE)
+    print("    Version       ", version.VERSION)
+    exit()
+
+  run = runner.Runner(file, args['--dryrun'])
+  run.verbose = args["--verbose"]
 
   if args["ls"]:
     run.ls()
