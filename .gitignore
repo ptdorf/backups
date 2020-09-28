@@ -1,6 +1,7 @@
 /.venv/
 /build/
 /examples/
+/.coverage
 
 # general things to ignore
 dist/

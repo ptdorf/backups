@@ -2,17 +2,17 @@ language: python
 sudo: false
 
 script:
-  # - echo $PATH
-  # - ls -la /usr/local/bin/
-  # - ls -la /usr/bin/
-  - coverage run tests/test_simple.py
-  - py.test
+# - echo $PATH
+# - ls -la /usr/local/bin/
+# - ls -la /usr/bin/
+- py.test
+- coverage run tests/test_*.py
 
 after_success:
-  - codecov
+- codecov
 
 notifications:
+  on_failure: always
   email:
     recipients:
-      - ptdorf@gmail.com
-  on_failure: always
+    - ptdorf@gmail.com
