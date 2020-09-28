@@ -8,6 +8,7 @@ script:
 - export BACKUPS_FILE=examples/backups.yaml
 - backups help
 - backups version
+- backups env
 - backups ls
 - backups show acme
 - backups run acme --dryrun
