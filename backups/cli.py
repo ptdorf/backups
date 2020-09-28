@@ -93,17 +93,6 @@ def main():
     print("\nREPORT")
     print(yaml.dump(report, sort_keys=False))
 
-  return
-
-
-def increment(c):
-  c.uploads.append(4)
-
 
 if __name__ == "__main__":
   exit(main())
-  # import context
-  # c = context.Context()
-  # # c.uploads = [1]
-  # increment(c)
-  # print(c)
