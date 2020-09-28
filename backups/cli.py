@@ -26,9 +26,9 @@ Options:
 Environment variables:
   BACKUPS_FILE          The backups file (default /etc/backups/backups.yaml)
   BACKUPS_DUMPS_DIR     The dumps directory (default /tmp/backups)
-  BACKUPS_MYSQL_DUMP    The mysqldump binary (default picked from $PATH)
+  BACKUPS_MYSQLDUMP     The mysqldump binary (default picked from $PATH)
   BACKUPS_LOG_LEVEL     Default INFO
-  BACKUPS_STDERR_FILE   The stderr log file (default /tmp/backups.err)
+  BACKUPS_STDERR        The stderr log file (default /tmp/backups.err)
 
 Check https://github.com/ptdorf/backups#backups for more info
 
@@ -40,11 +40,11 @@ import docopt
 from . import version
 from . import runner
 
-BACKUPS_FILE        = os.environ.get("BACKUPS_FILE", "/etc/backups/backups.yaml")
-BACKUPS_DUMPS_DIR   = os.environ.get("BACKUPS_DUMPS_DIR", "/tmp/backups")
-BACKUPS_MYSQL_DUMP  = os.environ.get("BACKUPS_MYSQL_DUMP", "mysqldump")
-BACKUPS_LOG_LEVEL   = os.environ.get("BACKUPS_LOG_LEVEL", "INFO")
-BACKUPS_STDERR_FILE = os.environ.get("BACKUPS_STDERR_FILE", "/tmp/backups.err")
+BACKUPS_FILE       = os.environ.get("BACKUPS_FILE", "/etc/backups/backups.yaml")
+BACKUPS_DUMPS_DIR  = os.environ.get("BACKUPS_DUMPS_DIR", "/tmp/backups")
+BACKUPS_MYSQLDUMP  = os.environ.get("BACKUPS_MYSQLDUMP", "mysqldump")
+BACKUPS_LOG_LEVEL  = os.environ.get("BACKUPS_LOG_LEVEL", "INFO")
+BACKUPS_STDERR     = os.environ.get("BACKUPS_STDERR", "/tmp/backups.err")
 
 
 def main():
