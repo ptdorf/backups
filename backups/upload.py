@@ -30,7 +30,7 @@ def upload_s3(config, context):
     dest = f"s3://{bucket}/{folder}/{name}"
 
     logger.info(f"Uploading to {system.green(dest)}")
-    command = f"aws s3 cp {file} {dest} >{context.stderr} 2>&1"
+    command = f"aws s3 cp {file} {dest} >>{context.stderr} 2>>&1"
     system.exec(command)
     uploads.append(dest)
 
@@ -49,11 +49,30 @@ def upload_gs(config, context):
     dest = f"gs://{bucket}/{folder}/{name}"
 
     logger.info(f"Uploading to {system.green(dest)}")
-    command = f"gsutil cp {file} {dest} >{context.stderr} 2>&1"
+    command = f"gsutil cp {file} {dest} >>{context.stderr} 2>>&1"
     system.exec(command)
     uploads.append(dest)
 
   context.upload.append({
     "type": "gs",
+    "files": uploads,
+  })
+
+
+def upload_rsync(config, context):
+  directory = config.get("directory")
+  uploads = []
+  folder, files = _files(config, context)
+  for file, name in files:
+    name = os.path.basename(file)
+    dest = f"{directory}/{folder}/{name}"
+
+    logger.info(f"Moving to {system.green(dest)}")
+    command = f"rsync -ra --delete {file} {dest} >>{context.stderr} 2>>&1"
+    system.exec(command)
+    uploads.append(dest)
+
+  context.upload.append({
+    "type": "mv",
     "files": uploads,
   })

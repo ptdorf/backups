@@ -212,5 +212,5 @@ class Runner:
     start = os.path.dirname(self.context.dump)
     stop = self.context.dumps
     logger.info(f"Cleaning from {system.green(start)} until {system.green(stop)}")
-    system.exec(f"rm -frv {self.context.dump}* >{self.context.stderr} 2>&1")
+    system.exec(f"rm -frv {self.context.dump}* >>{self.context.stderr} 2>>&1")
     system.cleanup(start, stop)
