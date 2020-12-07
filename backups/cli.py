@@ -53,13 +53,14 @@ def main():
   args = docopt.docopt(__doc__, version=version.VERSION)
   if args["version"]:
     print(version.VERSION)
-    exit()
+    return
 
   if args["help"]:
     print(__doc__)
-    exit()
+    return
 
   if args["--verbose"]:
+    print("Verbosity enabled")
     print("Backups arguments")
     for k, v in args.items():
       print(f"    \033[38;5;242m{k}: {v}\033[0m")
@@ -74,7 +75,14 @@ def main():
     print("    Log level     ", BACKUPS_LOG_LEVEL)
     print("    Stderr        ", BACKUPS_STDERR)
     print("    Version       ", version.VERSION)
-    exit()
+    print("")
+    print("Environment variables")
+    print("    BACKUPS_FILE          ", BACKUPS_FILE)
+    print("    BACKUPS_DUMPS_DIR     ", BACKUPS_DUMPS_DIR)
+    print("    BACKUPS_MYSQLDUMP     ", BACKUPS_MYSQLDUMP)
+    print("    BACKUPS_LOG_LEVEL     ", BACKUPS_LOG_LEVEL)
+    print("    BACKUPS_STDERR        ", BACKUPS_STDERR)
+    return
 
   run = runner.Runner(file, args['--dryrun'])
   run.verbose = args["--verbose"]
