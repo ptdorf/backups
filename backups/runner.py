@@ -3,6 +3,7 @@ import time
 import yaml
 
 from . import logger
+from . import resolve
 from . import system
 from . import context
 from . import mysql
@@ -122,10 +123,10 @@ class Runner:
     return "%s -alv --host=%s --user=%s --password=%s --master-data=%i --triggers --events --dump-date --debug-info --single-transaction" % \
       (
         BACKUPS_MYSQLDUMP,
-        self.backup["connection"].get("host", ""),
-        self.backup["connection"].get("username", ""),
-        self.backup["connection"].get("password", ""),
-        self.options.get("master-data", 0),
+        resolve(self.backup["connection"].get("host", "")),
+        resolve(self.backup["connection"].get("username", "")),
+        resolve(self.backup["connection"].get("password", "")),
+        resolve(self.options.get("master-data", 0)),
       )
 
 

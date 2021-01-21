@@ -12,9 +12,9 @@ Simple data object that holds some values
 
 311.0.0 (2020-09-22)
   Breaking Changes
-      ▪ **(Assured Workloads)** Updated gcloud assured workloads list and
-        gcloud assured operations list commands to use separate flags for
-        organization and location.
+    ▪ **(Assured Workloads)** Updated gcloud assured workloads list and
+      gcloud assured operations list commands to use separate flags for
+      organization and location.
 """
 class Object():
 
