@@ -1,5 +1,5 @@
 """
-Backups mysql databases
+Backs up mysql databases
 
 Usage:
   backups ls                    [--file FILE]
@@ -8,8 +8,8 @@ Usage:
   backups run JOB               [--file FILE] [--verbose] [--dryrun]
   backups run JOB [DATABASE]    [--file FILE] [--verbose] [--dryrun]
   backups env
-  backups help
   backups version
+  backups help
 
 Commands:
   ls          # Prints the backup job names
