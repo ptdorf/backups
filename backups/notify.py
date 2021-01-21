@@ -16,7 +16,7 @@ def _size(context):
 
 def notify_slack(config, context):
   webhook = config.get("webhook")
-  text    = f"Backup *{context.job}* completed with *{_size(context)}*"
+  text    = f"Backup `{context.job}` completed with *{_size(context)}*"
   channel = config.get("channel", "#backups")
 
   payload = {
