@@ -1,7 +1,7 @@
 import json
 import requests
 
-from . import resolve
+from .resolve import resolve
 
 
 def _size(context):

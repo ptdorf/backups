@@ -3,13 +3,14 @@ import time
 import yaml
 
 from . import logger
-from . import resolve
 from . import system
 from . import context
 from . import mysql
 from . import compress
 from . import upload
 from . import notify
+
+from .resolve import resolve
 
 
 BACKUPS_DUMPS     = os.environ.get("BACKUPS_DUMPS", "/tmp/backups")

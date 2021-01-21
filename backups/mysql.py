@@ -1,6 +1,6 @@
 import MySQLdb
 
-from . import resolve
+from .resolve import resolve
 
 
 class Mysql:
