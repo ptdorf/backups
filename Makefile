@@ -3,6 +3,7 @@ all: clean build release
 clean:
 	rm -frv dist/ build/ *.egg-info
 	rm -frv backups/__pycache__
+	rm -frv .pytest_cache
 
 build: clean
 	# python setup.py sdist bdist_wheel upload

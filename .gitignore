@@ -1,13 +1,13 @@
 /.venv/
 /build/
 /.coverage
-
 # general things to ignore
 dist/
 *.egg-info/
 *.egg
 *.py[cod]
 __pycache__/
+.pytest_cache/
 *.so
 *~
 
