@@ -2,35 +2,35 @@
 Backups mysql databases
 
 Usage:
-  backups env
   backups ls                    [--file FILE]
   backups show JOB              [--file FILE]
   backups databases JOB         [--file FILE]
   backups run JOB               [--file FILE] [--verbose] [--dryrun]
   backups run JOB [DATABASE]    [--file FILE] [--verbose] [--dryrun]
+  backups env
   backups help
   backups version
 
 Commands:
-  env         Show the current environment
-  ls          Prints the backup job names
-  show        Prints the configuration for a job
-  databases   Lists all databases on a backup job server
-  run         Runs the backup for a job
+  ls          # Prints the backup job names
+  show        # Prints the configuration for a job
+  databases   # Lists all databases on a backup job server
+  run         # Runs the backup for a job
+  env         # Show the current environment
 
 Options:
-  -f --file FILE    The backups config file (default /etc/backups/backups.yaml)
-  -d --dryrun       Just prints the commands but doesn't execute them
-  -v --verbose      Adds verbosity
-  -h --help         Prints this help
-     --version      Prints the current version
+  -f --file FILE    # The backups config file (default /etc/backups/backups.yaml)
+  -d --dryrun       # Just prints the commands but doesn't execute them
+  -v --verbose      # Adds verbosity
+  -h --help         # Prints this help
+     --version      # Prints the current version
 
 Environment variables:
-  BACKUPS_FILE          The backups file (default /etc/backups/backups.yaml)
-  BACKUPS_DUMPS_DIR     The dumps directory (default /tmp/backups)
-  BACKUPS_MYSQLDUMP     The mysqldump binary (default picked from $PATH)
-  BACKUPS_LOG_LEVEL     Default INFO
-  BACKUPS_STDERR        The stderr log file (default /tmp/backups.err)
+  BACKUPS_FILE          # The backups file (default /etc/backups/backups.yaml)
+  BACKUPS_DUMPS_DIR     # The dumps directory (default /tmp/backups)
+  BACKUPS_MYSQLDUMP     # The mysqldump binary (default picked from $PATH)
+  BACKUPS_LOG_LEVEL     # Default INFO
+  BACKUPS_STDERR        # The stderr log file (default /tmp/backups.err)
 
 Check https://github.com/ptdorf/backups#backups for more info
 
@@ -69,19 +69,19 @@ def main():
 
   if args["env"]:
     print("Backups environment")
-    print("    File          ", file)
-    print("    Dumps dir     ", BACKUPS_DUMPS_DIR)
-    print("    Mysqldump     ", BACKUPS_MYSQLDUMP)
-    print("    Log level     ", BACKUPS_LOG_LEVEL)
-    print("    Stderr        ", BACKUPS_STDERR)
-    print("    Version       ", version.VERSION)
+    print("  File          ", file)
+    print("  Dumps dir     ", BACKUPS_DUMPS_DIR)
+    print("  Mysqldump     ", BACKUPS_MYSQLDUMP)
+    print("  Log level     ", BACKUPS_LOG_LEVEL)
+    print("  Stderr        ", BACKUPS_STDERR)
+    print("  Version       ", version.VERSION)
     print("")
     print("Environment variables")
-    print("    BACKUPS_FILE          ", BACKUPS_FILE)
-    print("    BACKUPS_DUMPS_DIR     ", BACKUPS_DUMPS_DIR)
-    print("    BACKUPS_MYSQLDUMP     ", BACKUPS_MYSQLDUMP)
-    print("    BACKUPS_LOG_LEVEL     ", BACKUPS_LOG_LEVEL)
-    print("    BACKUPS_STDERR        ", BACKUPS_STDERR)
+    print("  BACKUPS_FILE          ", BACKUPS_FILE)
+    print("  BACKUPS_DUMPS_DIR     ", BACKUPS_DUMPS_DIR)
+    print("  BACKUPS_MYSQLDUMP     ", BACKUPS_MYSQLDUMP)
+    print("  BACKUPS_LOG_LEVEL     ", BACKUPS_LOG_LEVEL)
+    print("  BACKUPS_STDERR        ", BACKUPS_STDERR)
     return
 
   run = runner.Runner(file, args['--dryrun'])
