@@ -12,28 +12,27 @@ Usage:
   backups help
 
 Commands:
-  ls          # Prints the backup job names
-  show        # Prints the configuration for a job
-  databases   # Lists all databases on a backup job server
-  run         # Runs the backup for a job
-  env         # Show the current environment
+  ls          Lists all the backup job names
+  show        Shows the configuration for a job
+  databases   Lists all databases on a backup job server
+  run         Runs the backup for a job
+  env         Show the current environment
 
 Options:
-  -f --file FILE    # The backups config file (default /etc/backups/backups.yaml)
-  -d --dryrun       # Just prints the commands but doesn't execute them
-  -v --verbose      # Adds verbosity
-  -h --help         # Prints this help
-     --version      # Prints the current version
+  -f --file FILE    The backups config file (default /etc/backups/backups.yaml)
+  -d --dryrun       Just prints the commands but don't execute them
+  -v --verbose      Adds verbosity
+  -h --help         Prints this help
+     --version      Prints the current version
 
 Environment variables:
-  BACKUPS_FILE          # The backups file (default /etc/backups/backups.yaml)
-  BACKUPS_DUMPS_DIR     # The dumps directory (default /tmp/backups)
-  BACKUPS_MYSQLDUMP     # The mysqldump binary (default picked from $PATH)
-  BACKUPS_LOG_LEVEL     # Default INFO
-  BACKUPS_STDERR        # The stderr log file (default /tmp/backups.err)
+  BACKUPS_FILE          The backups config file (default /etc/backups/backups.yaml)
+  BACKUPS_DUMPS_DIR     The dumps directory (default /tmp/backups)
+  BACKUPS_MYSQLDUMP     The mysqldump binary (default picked from $PATH)
+  BACKUPS_LOG_LEVEL     Default INFO
+  BACKUPS_STDERR        The stderr log file (default /tmp/backups.err)
 
 Check https://github.com/ptdorf/backups#backups for more info
-
 """
 import os
 import yaml
@@ -63,7 +62,7 @@ def main():
     print("Verbosity enabled")
     print("Backups arguments")
     for k, v in args.items():
-      print(f"    \033[38;5;242m{k}: {v}\033[0m")
+      print(f"- \033[38;5;242m{k}: {v}\033[0m")
 
   file = args['--file'] if args['--file'] else BACKUPS_FILE
 
