@@ -21,7 +21,6 @@ jobs:
       run: |
         pip install -r requirements.txt
         pytest
-        backups --version
 
     - name: Run example
       env:
@@ -30,8 +29,13 @@ jobs:
         BACKUPS_ZIP_PASSWORD: ${{ secrets.BACKUPS_ZIP_PASSWORD }}
         BACKUPS_SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
       run: |
-        export
+        echo "==> backups --version"
+        backups --version
+
+        echo "==> backups ls"
         backups ls
+
+        echo "==> backups show acme"
         backups show acme
 
     - name: Send slack notification
