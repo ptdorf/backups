@@ -4,7 +4,7 @@ backups:
       connection:
         type:       mysql
         host:       !Env ${BACKUPS_DB_HOST:localhost}
-        username:   !Env ${BACKUPS_DB_USERNAME:backups}
+        username:   !Env ${BACKUPS_DB_USERNAME:backup}
         password:   !Env ${BACKUPS_DB_PASSWORD:}
       options:
         ignore:
