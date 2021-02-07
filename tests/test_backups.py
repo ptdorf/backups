@@ -3,8 +3,8 @@
 # setup.py that excludes installing the "tests" package
 import backups.version
 
-def test_success():
-    assert True
+def test_true():
+  assert True
 
 def test_version():
   assert backups.version.VERSION is not None
