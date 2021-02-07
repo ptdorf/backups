@@ -58,29 +58,36 @@ backups:
   jobs:
     acme:
       connection:
-        type:         mysql
-        host:         acme.com
-        username:     backups
-        password:     password
+        type:     mysql
+        host:     !Env ${BACKUPS_DB_HOST:acme.com}
+        username: !Env ${BACKUPS_DB_USERNAME:backup}
+        password: !Env ${BACKUPS_DB_PASSWORD}
       options:
-        server: true  # Dumps the entire server into a single file
+        # Dumps the entire server into a single file (this is the default)
+        server: true
         # By default it will create a single dump file for each database found
         # Uncomment to only backups specific databases (one on each file)
         # databases:
         # - main_db
         # - other_db
       compress:
-      - type: zip
-        pasword: secret
+      - type:     zip
+        pasword:  !Env ${BACKUPS_ZIP_PASSWORD}
       upload:
-      - type: s3
-        bucket: acme-backups
-        path:   databases
+      - type:     s3
+        bucket:   acme-backups
+        prefix:   databases
+        enabled:  true
       notify:
-      - type: slack
-        webhook: https://hooks.slack.com/services/x/y/z
-        channel: "#backups"
+      - type:     slack
+        channel:  "#backups"
+        webhook:  !Env ${BACKUPS_SLACK_WEBHOOK:https://hooks.slack.com/services/x/y/z}
 ```
+
+Notice the use of the environment variables, like `BACKUPS_DB_HOST`, used in
+combination with the `!Env` yaml resolver. If they exist they get resolved to
+their values. Use the format `${VAR_NAME:default_value}` to have a default value
+`default_value` if `$VAR_NAME` is not defined.
 
 Now run it with
 

@@ -3,26 +3,26 @@ backups:
     acme:
       connection:
         type:       mysql
-        host:       acme.com
-        username:   backups
-        password:   password
+        host:       !Env ${BACKUPS_DB_HOST:localhost}
+        username:   !Env ${BACKUPS_DB_USERNAME:backups}
+        password:   !Env ${BACKUPS_DB_PASSWORD:}
       options:
         ignore:
         - test_db
 
       compress:
       - type: zip
-        password: secret
+        password: !Env ${BACUKPS_ZIP_PASSWORD}
 
       upload:
       - type: s3
-        bucket: acme-backups
+        bucket: !Env ${BACKUPS_S3_BUCKET:jpedro-backups}
         prefix: databases
-      - type: gs
         enabled: false
-        bucket: acme-backups
+      - type: gs
+        bucket: !Env ${BACKUPS_GS_BUCKET:jpedro-backups}
         prefix: databases
 
       notify:
       - type: slack
-        webhook: https://hooks.slack.com/services/x/y/z
+        webhook: !Env ${BACKUPS_SLACK_WEBHOOK:https://hooks.slack.com/services/x/y/z}

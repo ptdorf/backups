@@ -1,4 +1,5 @@
 import os
+import re
 import time
 import yaml
 
@@ -35,8 +36,9 @@ class Runner:
     if not os.path.isfile(self.context.file):
       raise RuntimeError(f"File '{self.context.file}' doesn't exist.")
 
-    with open(self.context.file, "r") as f:
-      self.data = yaml.safe_load(f)
+    # with open(self.context.file, "r") as f:
+    self.data = self.parse(self.context.file)
+    # print(self.data)
 
     if not "backups" in self.data.keys():
       raise RuntimeError(f"File '{self.file}' doesn't have a backups top key.")
@@ -216,3 +218,41 @@ class Runner:
     logger.info(f"Cleaning from {system.green(start)} until {system.green(stop)}")
     system.exec(f"rm -frv {self.context.dump}* >>{self.context.stderr} 2>&1")
     system.cleanup(start, stop)
+
+
+  def parse(self, file):
+    loader = yaml.SafeLoader
+    envTag = '!Env'
+    # pattern for global vars: look for ${word}
+    pattern = re.compile('.*?\${(\w+):?(.*)}.*?')
+
+    # the tag will be used to mark where to start searching for the
+    # pattern e.g. somekey: !env somestring${MYENVVAR}blah blah
+    loader.add_implicit_resolver(envTag, pattern, None)
+
+    def constructor_env(loader, node):
+      print(f"------------------")
+      value = loader.construct_scalar(node)
+      print(f"--> VALUE  {value}")
+      match = pattern.findall(value)
+      print(f"--> MATCH  {match}")
+      if match:
+        full_value = value
+        for group in match:
+          print(f"--> GROUP  {group}")
+          var = os.environ.get(group[0], group[1] or f"${group[0]}")
+          print(f"--> FOUND  {var}")
+          full_value = full_value.replace(
+            f"{value}", var
+          )
+        return full_value
+      return value
+
+    loader.add_constructor(envTag, constructor_env)
+
+    with open(file, "r") as f:
+      data = yaml.load(f, Loader=loader)
+
+    print(yaml.dump(data, sort_keys=False))
+    exit(2)
+    return data
