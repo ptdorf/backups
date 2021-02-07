@@ -36,9 +36,7 @@ class Runner:
     if not os.path.isfile(self.context.file):
       raise RuntimeError(f"File '{self.context.file}' doesn't exist.")
 
-    # with open(self.context.file, "r") as f:
     self.data = self.parse(self.context.file)
-    # print(self.data)
 
     if not "backups" in self.data.keys():
       raise RuntimeError(f"File '{self.file}' doesn't have a backups top key.")
@@ -231,17 +229,17 @@ class Runner:
     loader.add_implicit_resolver(envTag, pattern, None)
 
     def constructor_env(loader, node):
-      print(f"------------------")
+      # print(f"------------------")
       value = loader.construct_scalar(node)
-      print(f"--> VALUE  {value}")
+      # print(f"--> VALUE  {value}")
       match = pattern.findall(value)
-      print(f"--> MATCH  {match}")
+      # print(f"--> MATCH  {match}")
       if match:
         full_value = value
         for group in match:
-          print(f"--> GROUP  {group}")
+          # print(f"--> GROUP  {group}")
           var = os.environ.get(group[0], group[1] or f"${group[0]}")
-          print(f"--> FOUND  {var}")
+          # print(f"--> FOUND  {var}")
           full_value = full_value.replace(
             f"{value}", var
           )
@@ -253,6 +251,5 @@ class Runner:
     with open(file, "r") as f:
       data = yaml.load(f, Loader=loader)
 
-    print(yaml.dump(data, sort_keys=False))
-    exit(2)
+    # print(yaml.dump(data, sort_keys=False))
     return data
