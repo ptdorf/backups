@@ -23,6 +23,9 @@ jobs:
         BACKUPS_ZIP_PASSWORD: ${{ secrets.BACKUPS_ZIP_PASSWORD }}
         BACKUPS_SLACK_WEBHOOK: ${{ secrets.BACKUPS_SLACK_WEBHOOK }}
 
+    - name: Prints the environment
+      run: printenv
+
     - name: Run tests
       run: |
         pip install -r requirements.txt
