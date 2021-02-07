@@ -19,7 +19,6 @@ jobs:
       run: |
         pip install -r requirements.txt
         pytest
-        exit 1
 
     - name: Run example
       env:
