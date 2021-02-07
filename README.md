@@ -90,8 +90,8 @@ backups:
 
 Notice the use of the environment variables, like `BACKUPS_DB_HOST`, used in
 combination with the `!Env` yaml resolver. If they exist they get resolved to
-their values. Use the format `${VAR_NAME:default_value}` to have a default value
-`default_value` if `$VAR_NAME` is not defined.
+their values. Use the format `${VAR_NAME:default_value}` to use `default_value`
+if `$VAR_NAME` is not defined.
 
 Now run it with
 
