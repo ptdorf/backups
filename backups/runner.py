@@ -69,8 +69,9 @@ class Runner:
 
 
   def databases(self, job):
-    self.mysql = mysql.Mysql(self.backup["connection"])
     self.load(job)
+
+    self.mysql = mysql.Mysql(self.backup["connection"])
     rows = self.mysql.query("SHOW DATABASES")
     for i in rows:
       print(i["Database"])
@@ -79,8 +80,8 @@ class Runner:
   def run(self, job, database):
     system.verbose = self.verbose
 
-    self.mysql = mysql.Mysql(self.backup["connection"])
     self.load(job)
+    self.mysql = mysql.Mysql(self.backup["connection"])
     self.prepare(job, database)
 
     if database:
