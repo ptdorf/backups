@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/ptdorf/backups.svg?branch=master)](https://travis-ci.org/ptdorf/backups)
 
 
-Tool to backup mysql databases.
+Tool to backup databases.
 
 
 ## Installation
