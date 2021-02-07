@@ -5,13 +5,12 @@ script:
 - pip install .
 - py.test
 - coverage run tests/test_*.py
-- export BACKUPS_FILE=examples/backups.yaml
+- export BACKUPS_FILE=example/backups.yaml
 - backups help
 - backups version
 - backups env
 - backups ls
 - backups show acme
-- backups run acme --dryrun
 
 after_success:
 - codecov

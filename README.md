@@ -1,8 +1,10 @@
-# backups
+# Backups
 
+[![Github Status](https://github.com/ptdorf/backups/workflows/tests/badge.svg)](https://github.com/ptdorf/backups/actions)
 [![Build Status](https://travis-ci.org/ptdorf/backups.svg?branch=master)](https://travis-ci.org/ptdorf/backups)
 
-Basic tool to backup mysql databases.
+
+Tool to backup mysql databases.
 
 
 ## Installation

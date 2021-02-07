@@ -37,7 +37,7 @@ setup(
       "backups=backups.cli:main",
     ],
   },
-  scripts=[
-    "bin/backups-check",
-  ]
+  # scripts=[
+  #   "bin/backups-check",
+  # ]
 )

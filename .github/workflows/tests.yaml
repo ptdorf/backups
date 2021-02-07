@@ -1,0 +1,39 @@
+name: tests
+
+on:
+- push
+- pull_request
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install python
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.8"
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Run tests
+      run: |
+        pytest
+        pip install .
+        backups --version
+
+    - name: Run example
+      run: |
+        export BACKUPS_FILE="example/backups.yaml"
+        backups ls
+        backups show acme
+
+    - name: Send slack notification
+      uses: 8398a7/action-slack@v3
+      if: always()
+      with:
+        status: ${{ job.status }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
