@@ -1,7 +1,9 @@
 # Backups
 
 [![Github Status](https://github.com/ptdorf/backups/workflows/tests/badge.svg)](https://github.com/ptdorf/backups/actions)
-[![Build Status](https://travis-ci.org/ptdorf/backups.svg?branch=master)](https://travis-ci.org/ptdorf/backups)
+<!--
+[![Travis Status](https://travis-ci.org/ptdorf/backups.svg?branch=master)](https://travis-ci.org/ptdorf/backups)
+-->
 
 
 Tool to backup databases.
