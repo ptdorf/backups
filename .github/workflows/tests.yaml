@@ -26,6 +26,7 @@ jobs:
     - name: Run example
       run: |
         export BACKUPS_FILE="example/backups.yaml"
+        export
         backups ls
         backups show acme
 
