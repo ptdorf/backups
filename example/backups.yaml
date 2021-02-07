@@ -12,7 +12,7 @@ backups:
 
       compress:
       - type: zip
-        password: !Env ${BACUKPS_ZIP_PASSWORD}
+        password: !Env ${BACKUPS_ZIP_PASSWORD}
 
       upload:
       - type: s3

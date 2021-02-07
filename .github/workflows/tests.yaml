@@ -28,7 +28,7 @@ jobs:
         BACKUPS_FILE: example/backups.yaml
         BACKUPS_DB_PASSWORD: ${{ secrets.BACKUPS_DB_PASSWORD }}
         BACKUPS_ZIP_PASSWORD: ${{ secrets.BACKUPS_ZIP_PASSWORD }}
-        BACKUPS_SLACK_WEBHOOK: ${{ secrets.BACKUPS_SLACK_WEBHOOK }}
+        BACKUPS_SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
       run: |
         export
         backups ls
