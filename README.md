@@ -5,7 +5,6 @@
 [![Travis Status](https://travis-ci.org/ptdorf/backups.svg?branch=master)](https://travis-ci.org/ptdorf/backups)
 -->
 
-
 Tool to backup databases.
 
 
