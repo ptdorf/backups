@@ -1,8 +1,6 @@
 import json
 import requests
 
-from .resolve import resolve
-
 
 def _size(context):
   if context.compress is []:
@@ -17,9 +15,9 @@ def _size(context):
 
 
 def notify_slack(config, context):
-  webhook = resolve(config.get("webhook"))
+  webhook = config.get("webhook")
   text    = f"Backup `{context.job}` completed with *{_size(context)}*"
-  channel = resolve(config.get("channel", "#backups"))
+  channel = config.get("channel", "#backups")
 
   payload = {
     "text": text,

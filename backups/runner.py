@@ -11,8 +11,6 @@ from . import compress
 from . import upload
 from . import notify
 
-from .resolve import resolve
-
 
 BACKUPS_DUMPS     = os.environ.get("BACKUPS_DUMPS", "/tmp/backups")
 BACKUPS_MYSQLDUMP = os.environ.get("BACKUPS_MYSQLDUMP", "mysqldump")
@@ -54,7 +52,6 @@ class Runner:
 
     self.backup  = self.backups["jobs"][job]
     self.options = self.backup.get("options", {})
-    self.mysql   = mysql.Mysql(self.backup["connection"])
 
 
   def dump(self):
@@ -72,6 +69,7 @@ class Runner:
 
 
   def databases(self, job):
+    self.mysql = mysql.Mysql(self.backup["connection"])
     self.load(job)
     rows = self.mysql.query("SHOW DATABASES")
     for i in rows:
@@ -81,6 +79,7 @@ class Runner:
   def run(self, job, database):
     system.verbose = self.verbose
 
+    self.mysql = mysql.Mysql(self.backup["connection"])
     self.load(job)
     self.prepare(job, database)
 
@@ -124,10 +123,10 @@ class Runner:
     return "%s -alv --host=%s --user=%s --password=%s --master-data=%i --triggers --events --dump-date --debug-info --single-transaction" % \
       (
         BACKUPS_MYSQLDUMP,
-        resolve(self.backup["connection"].get("host", "")),
-        resolve(self.backup["connection"].get("username", "")),
-        resolve(self.backup["connection"].get("password", "")),
-        resolve(self.options.get("master-data", 0)),
+        self.backup["connection"].get("host", ""),
+        self.backup["connection"].get("username", ""),
+        self.backup["connection"].get("password", ""),
+        self.options.get("master-data", 0),
       )
 
 

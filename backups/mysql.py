@@ -1,7 +1,5 @@
 import MySQLdb
 
-from .resolve import resolve
-
 
 class Mysql:
 
@@ -9,13 +7,13 @@ class Mysql:
     self.config = config
 
     args = {
-      "host":   resolve(self.config["host"]),
-      "user":   resolve(self.config["username"]),
-      "passwd": resolve(self.config["password"]),
+      "host":   self.config["host"],
+      "user":   self.config["username"],
+      "passwd": self.config["password"],
     }
 
     if self.config.get("database") is not None:
-      args["db"] = resolve(self.config["database"])
+      args["db"] = self.config["database"]
 
     self.connection = MySQLdb.connect(**args)
 
