@@ -1,6 +1,6 @@
 # Backups
 
-[![Github Status](https://github.com/ptdorf/backups/workflows/build/badge.svg)](https://github.com/ptdorf/backups/actions)
+[![Github Status](https://github.com/ptdorf/backups/workflows/.github/workflows/build.yaml/badge.svg)](https://github.com/ptdorf/backups/actions)
 <!--
 [![Travis Status](https://travis-ci.org/ptdorf/backups.svg?branch=master)](https://travis-ci.org/ptdorf/backups)
 -->
