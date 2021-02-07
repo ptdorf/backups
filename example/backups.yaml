@@ -1,4 +1,6 @@
 backups:
+  env: !Conf "@example/backups.conf"
+
   jobs:
     acme:
       connection:

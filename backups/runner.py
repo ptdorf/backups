@@ -219,37 +219,46 @@ class Runner:
 
 
   def parse(self, file):
-    loader = yaml.SafeLoader
-    envTag = '!Env'
-    # pattern for global vars: look for ${word}
-    pattern = re.compile('.*?\${(\w+):?(.*)}.*?')
+    loader  = yaml.SafeLoader
+    tagEnv  = '!Env'
+    tagConf = '!Conf'
 
-    # the tag will be used to mark where to start searching for the
-    # pattern e.g. somekey: !env somestring${MYENVVAR}blah blah
-    loader.add_implicit_resolver(envTag, pattern, None)
+    patternEnv  = re.compile('.*?\${(\w+):?(.*)}.*?')
+    patternConf = re.compile('@(.*)')
 
-    def constructor_env(loader, node):
-      # print(f"------------------")
+    loader.add_implicit_resolver(tagEnv,  patternEnv,  None)
+    loader.add_implicit_resolver(tagConf, patternConf, None)
+
+    def constructorEnv(loader, node):
       value = loader.construct_scalar(node)
-      # print(f"--> VALUE  {value}")
-      match = pattern.findall(value)
-      # print(f"--> MATCH  {match}")
+      match = patternEnv.findall(value)
       if match:
-        full_value = value
+        res = value
         for group in match:
-          # print(f"--> GROUP  {group}")
           var = os.environ.get(group[0], group[1] or f"${group[0]}")
-          # print(f"--> FOUND  {var}")
-          full_value = full_value.replace(
-            f"{value}", var
-          )
-        return full_value
+          res = res.replace(value, var)
+        return res
+
       return value
 
-    loader.add_constructor(envTag, constructor_env)
+    def constructorConf(loader, node):
+      value = loader.construct_scalar(node)
+      match = patternConf.findall(value)
+      if match:
+        env = {}
+        with open(match[0], "r") as f:
+          for line in f.readlines():
+            if line.find("=") > 0:
+              key, val = line.split("=")
+              env[key] = val.strip()
+              os.environ[key] = env[key]
+          return env
+      return value
+
+    loader.add_constructor(tagEnv,  constructorEnv)
+    loader.add_constructor(tagConf, constructorConf)
 
     with open(file, "r") as f:
       data = yaml.load(f, Loader=loader)
 
-    # print(yaml.dump(data, sort_keys=False))
     return data
