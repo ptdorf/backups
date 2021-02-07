@@ -19,8 +19,8 @@ jobs:
 
     - name: Run tests
       run: |
+        pip install -r requirements.txt
         pytest
-        pip install .
         backups --version
 
     - name: Run example
