@@ -100,3 +100,9 @@ You can use the `BACKUPS_FILE` env var instead:
 
     export BACKUPS_FILE=backups.yaml
     backups run acme
+
+
+## Todos
+
+- [ ] Move `type` from connection to `job.type`
+- [ ] Add more types, like `file`
