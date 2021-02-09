@@ -106,3 +106,7 @@ You can use the `BACKUPS_FILE` env var instead:
 
 - [ ] Move `type` from connection to `job.type`
 - [ ] Add more types, like `file`
+- [ ] Document the use of `!Conf @{/path/to/file.conf}`
+- [ ] Use dynamic tags instead
+      Check https://www.programcreek.com/python/?code=bridgecrewio%2Fcheckov%2Fcheckov-master%2Fcheckov%2Fcloudformation%2Fparser%2Fcfn_yaml.py
+      for inspiration
