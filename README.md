@@ -114,7 +114,7 @@ You can use the `BACKUPS_FILE` env var instead:
 
 <!-- <b id="f1">1</b> For inspiration, check:  -->
 [1] For inspiration, check:
-- https://www.programcreek.com/python/?code=bridgecrewio%2Fcheckov%2Fcheckov-master%2Fcheckov%2Fcloudformation%2Fparser%2Fcfn_yaml.py
-- https://www.programcreek.com/python/example/15349/yaml.SequenceNode
-- https://pyyaml.org/wiki/PyYAMLDocumentation
+- [Cloudformation parser](https://www.programcreek.com/python/?code=bridgecrewio%2Fcheckov%2Fcheckov-master%2Fcheckov%2Fcloudformation%2Fparser%2Fcfn_yaml.py)
+- [Yaml sequence examples](https://www.programcreek.com/python/example/15349/yaml.SequenceNode)
+- [Official yaml docs](https://pyyaml.org/wiki/PyYAMLDocumentation)
 <!-- (#a1) -->
