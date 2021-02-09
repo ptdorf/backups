@@ -107,10 +107,13 @@ You can use the `BACKUPS_FILE` env var instead:
 - [ ] Move `type` from connection to `job.type`
 - [ ] Add more types, like `file`
 - [ ] Document the use of `!Conf @{/path/to/file.conf}`
-- [ ] Use dynamic tags instead <sup id="a1">[1](#f1)</sup>
+- [ ] Use dynamic tags instead [1]
+
+<!-- <sup id="a1">[1](#f1)</sup> -->
 
 
-<b id="f1">1</b> For inspiration, check:
+<!-- <b id="f1">1</b> For inspiration, check:  -->
+[1] For inspiration, check:
 - https://www.programcreek.com/python/?code=bridgecrewio%2Fcheckov%2Fcheckov-master%2Fcheckov%2Fcloudformation%2Fparser%2Fcfn_yaml.py
 - https://www.programcreek.com/python/example/15349/yaml.SequenceNode
 - https://pyyaml.org/wiki/PyYAMLDocumentation
