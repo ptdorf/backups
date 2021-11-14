@@ -3,7 +3,7 @@ Backs up mysql databases
 
 Usage:
   backups ls                    [--file FILE]
-  backups show JOB              [--file FILE]
+  backups show [JOB]            [--file FILE]
   backups databases JOB         [--file FILE]
   backups run JOB               [--file FILE] [--verbose] [--dryrun]
   backups run JOB [DATABASE]    [--file FILE] [--verbose] [--dryrun]
@@ -13,7 +13,7 @@ Usage:
 
 Commands:
   ls          Lists all the backup job names
-  show        Shows the configuration for a job
+  show        Shows all the configuration or just for a specific job
   databases   Lists all databases on a backup job server
   run         Runs the backup for a job
   env         Show the current environment
@@ -87,15 +87,15 @@ def main():
   run.verbose = args["--verbose"]
 
   if args["ls"]:
-    run.ls()
+    return run.ls()
 
-  elif args["show"]:
-    run.show(args["JOB"])
+  if args["show"]:
+    return run.show(args.get("JOB"))
 
-  elif args["databases"]:
-    run.databases(args["JOB"])
+  if args["databases"]:
+    return run.databases(args["JOB"])
 
-  elif args["run"]:
+  if args["run"]:
     report = run.run(args["JOB"], args["DATABASE"])
     print("\nREPORT")
     print(yaml.dump(report, sort_keys=False))

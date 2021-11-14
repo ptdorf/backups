@@ -1,5 +1,4 @@
 import os
-import re
 import time
 import yaml
 
@@ -10,6 +9,7 @@ from . import mysql
 from . import compress
 from . import upload
 from . import notify
+from .loader import Loader
 
 
 BACKUPS_DUMPS     = os.environ.get("BACKUPS_DUMPS", "/tmp/backups")
@@ -63,9 +63,12 @@ class Runner:
       print(job)
 
 
-  def show(self, job):
-    self.load(job)
-    print(yaml.dump(self.backup, sort_keys=False))
+  def show(self, job=None):
+    if job:
+      self.load(job)
+      print(yaml.dump(self.backup, sort_keys=False))
+    else:
+      print(yaml.dump(self.data, sort_keys=False))
 
 
   def databases(self, job):
@@ -73,8 +76,8 @@ class Runner:
 
     self.mysql = mysql.Mysql(self.backup["connection"])
     rows = self.mysql.query("SHOW DATABASES")
-    for i in rows:
-      print(i["Database"])
+    for row in rows:
+      print(row["Database"])
 
 
   def run(self, job, database):
@@ -120,7 +123,7 @@ class Runner:
     system.exec(f"mkdir -p {self.context.dump}")
 
 
-  def get_mysql_dump(self):
+  def get_mysql_cmd(self):
     return "%s -alv --host=%s --user=%s --password=%s --master-data=%i --triggers --events --dump-date --debug-info --single-transaction" % \
       (
         BACKUPS_MYSQLDUMP,
@@ -136,7 +139,7 @@ class Runner:
 
     sql_file = "%s/%s%s.sql" % (self.context.dump, self.options.get("prefix", ""), "all-databases")
     err_file = self.options.get("stderr", self.context.stderr)
-    command  = f"{self.get_mysql_dump()} --all-databases > {sql_file} 2>{err_file}"
+    command  = f"{self.get_mysql_cmd()} --all-databases > {sql_file} 2>{err_file}"
 
     system.exec(command)
 
@@ -179,8 +182,8 @@ class Runner:
       return
 
     for config in methods:
-      f = getattr(compress, "compress_" + config["type"])
-      f(config, self.context)
+      fn = getattr(compress.Compress, config["type"])
+      fn(config, self.context)
 
 
   def upload(self):
@@ -190,8 +193,8 @@ class Runner:
       return
 
     for config in methods:
-      f = getattr(upload, "upload_" + config["type"])
-      f(config, self.context)
+      fn = getattr(upload.Upload, config["type"])
+      fn(config, self.context)
 
 
   def notify(self):
@@ -201,8 +204,8 @@ class Runner:
       return
 
     for config in methods:
-      f = getattr(notify, "notify_" + config["type"])
-      f(config, self.context)
+      fn = getattr(notify.Notify, config["type"])
+      fn(config, self.context)
 
 
   def cleanup(self):
@@ -219,46 +222,59 @@ class Runner:
 
 
   def parse(self, file):
-    loader  = yaml.SafeLoader
-    tagEnv  = '!Env'
-    tagConf = '!Conf'
-
-    patternEnv  = re.compile('.*?\${(\w+):?(.*)}.*?')
-    patternConf = re.compile('@(.*)')
-
-    loader.add_implicit_resolver(tagEnv,  patternEnv,  None)
-    loader.add_implicit_resolver(tagConf, patternConf, None)
-
-    def constructorEnv(loader, node):
-      value = loader.construct_scalar(node)
-      match = patternEnv.findall(value)
-      if match:
-        res = value
-        for group in match:
-          var = os.environ.get(group[0], group[1] or f"${group[0]}")
-          res = res.replace(value, var)
-        return res
-
-      return value
-
-    def constructorConf(loader, node):
-      value = loader.construct_scalar(node)
-      match = patternConf.findall(value)
-      if match:
-        env = {}
-        with open(match[0], "r") as f:
-          for line in f.readlines():
-            if line.find("=") > 0:
-              key, val = line.split("=")
-              env[key] = val.strip()
-              os.environ[key] = env[key]
-          return env
-      return value
-
-    loader.add_constructor(tagEnv,  constructorEnv)
-    loader.add_constructor(tagConf, constructorConf)
-
-    with open(file, "r") as f:
-      data = yaml.load(f, Loader=loader)
+    data = Loader.yaml(file)
 
     return data
+
+    # loader  = yaml.SafeLoader
+    # tagEnv  = '!env'
+    # tagConf = '!conf'
+
+    # patternEnv  = re.compile('.*?\${(\w+):?(.*)}.*?')
+    # patternConf = re.compile('@(.*)')
+
+    # loader.add_implicit_resolver(tagEnv,  patternEnv,  None)
+    # loader.add_implicit_resolver(tagConf, patternConf, None)
+    # yaml.add_constructor("!env", Loader.env, yaml.SafeLoader)
+
+    # def constructorEnv(loader, node):
+    #   try:
+    #     name = loader.construct_scalar(node)
+    #     value = os.environ.get(name)
+    #     if value:
+    #       return value
+    #     return f"!env {name}"
+
+    #   except:
+    #     return f"!env {name}"
+
+    #   # match = patternEnv.findall(value)
+    #   # if match:
+    #   #   res = value
+    #   #   for group in match:
+    #   #     var = os.environ.get(group[0], group[1] or f"${group[0]}")
+    #   #     res = res.replace(value, var)
+    #   #   return res
+
+    #   # return value
+
+    # # def constructorConf(loader, node):
+    # #   value = loader.construct_scalar(node)
+    # #   match = patternConf.findall(value)
+    # #   if match:
+    # #     env = {}
+    # #     with open(match[0], "r") as f:
+    # #       for line in f.readlines():
+    # #         if line.find("=") > 0:
+    # #           key, val = line.split("=")
+    # #           env[key] = val.strip()
+    # #           os.environ[key] = env[key]
+    # #       return env
+    # #   return value
+
+    # loader.add_constructor("!env", constructorEnv)
+    # # loader.add_constructor(tagEnv,  constructorEnv)
+    # # loader.add_constructor(tagConf, constructorConf)
+
+    # with open(file, "r") as f:
+    #   data = yaml.load(f, Loader=loader)

@@ -1,6 +1,8 @@
-from . import data
+# from . import data
+# class Context(data.Data):
 
-class Context(data.Object):
+
+class Context:
 
   def __init__(self):
     self.file   = None
@@ -13,3 +15,12 @@ class Context(data.Object):
     self.compress = []
     self.upload   = []
     self.notify   = []
+
+
+  def __str__(self):
+    text = str(self.__class__) + "{"
+    for k, v in self.__dict__.items():
+      text = f"{text}'{k}': '{v}', "
+    text = text[0:-2] + "}"
+
+    return text

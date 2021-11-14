@@ -1,30 +1,30 @@
 backups:
-  env: !Conf "@example/backups.conf"
+  # conf: !Conf "@example/backups.conf"
 
   jobs:
     acme:
       connection:
         type:       mysql
-        host:       !Env ${BACKUPS_DB_HOST:localhost}
-        username:   !Env ${BACKUPS_DB_USERNAME:backup}
-        password:   !Env ${BACKUPS_DB_PASSWORD:}
+        host:       !Env [BACKUPS_DB_HOST, localhost]
+        username:   !Env [BACKUPS_DB_USERNAME, backup]
+        password:   !Env BACKUPS_DB_PASSWORD
       options:
         ignore:
         - test_db
 
       compress:
       - type: zip
-        password: !Env ${BACKUPS_ZIP_PASSWORD}
+        password: !Env BACKUPS_ZIP_PASSWORD
 
       upload:
-      - type: s3
-        bucket: !Env ${BACKUPS_S3_BUCKET:jpedro-backups}
-        prefix: databases
-        enabled: false
       - type: gs
-        bucket: !Env ${BACKUPS_GS_BUCKET:jpedro-backups}
-        prefix: databases
+        bucket: !Env [BACKUPS_GS_BUCKET, jpedro-backups]
+        prefix: !Env ["prefix/${BACKUPS_DB_HOST}/${BACKUPS_PREFIX}/suffix", jpedro-backups]
+      - type: s3
+        bucket: !Env [BACKUPS_S3_BUCKET, jpedro-backups]
+        prefix: !Env [BACKUPS_PREFIX, databases]
+        enabled: false
 
       notify:
       - type: slack
-        webhook: !Env ${BACKUPS_SLACK_WEBHOOK:https://hooks.slack.com/services/x/y/z}
+        webhook: !Env [BACKUPS_SLACK_WEBHOOK, "https://hooks.slack.com/services/x/y/z"]
