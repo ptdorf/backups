@@ -1,22 +1,35 @@
 import time
 import logging
 
-# logging.basicConfig(level=logging.DEBUG)
-# logging.basicConfig(
-#   level=logging.INFO,
-#   format="%(asctime)s  %(message)s"
-# )
+class Logger:
 
-# logger = logging.Logger()
-logger = logging.getLogger("backups")
-logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.StreamHandler())
-
-def info(message):
-  now = time.strftime("%Y-%m-%d %H:%M:%S")
-  logger.info("\033[38;5;242m%s\033[0m  %s" %(now, message))
+  COLOR_DEBUG = "38;5;242"
+  COLOR_INFO = "0"
+  COLOR_WARN = "32;1"
+  COLOR_ERROR = "31;1"
 
 
-def debug(message):
-  # print(message)
-  pass
+  def __init__(self, verbose: bool):
+    self.verbose = verbose
+    self.logger = logging.getLogger(__name__)
+
+    if self.verbose:
+      self.logger.setLevel(logging.DEBUG)
+
+    self.logger.addHandler(logging.StreamHandler())
+
+
+  def _format(self, message: str, color: str = None):
+    if color:
+      now = time.strftime("%Y-%m-%d %H:%M:%S")
+      return f"\033[{color}m{now}  {message}\033[0m"
+
+    return message
+
+
+  def info(self, message: str):
+    self.logger.info(self._format(message))
+
+
+  def debug(self, message: str):
+    self.logger.debug(self._format(message, self.COLOR_DEBUG))

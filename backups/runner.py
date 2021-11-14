@@ -4,12 +4,13 @@ import yaml
 
 from . import logger
 from . import system
-from . import context
 from . import mysql
-from . import compress
-from . import upload
-from . import notify
+
+from .execution import Execution
 from .loader import Loader
+from .compress import Compressor
+from .upload import Uploader
+from .notify import Notifier
 
 
 BACKUPS_DUMPS     = os.environ.get("BACKUPS_DUMPS", "/tmp/backups")
@@ -20,21 +21,21 @@ BACKUPS_STDERR    = os.environ.get("BACKUPS_STDERR", "/tmp/backups.err")
 
 class Runner:
 
-  context = context.Context()
+  execution = Execution()
   verbose = False
 
   def __init__(self, file, dryrun):
     system.dryrun = dryrun
 
-    self.context.file   = file
-    self.context.dryrun = dryrun
-    self.context.dumps  = BACKUPS_DUMPS
-    self.context.stderr = BACKUPS_STDERR
+    self.execution.file   = file
+    self.execution.dryrun = dryrun
+    self.execution.dumps  = BACKUPS_DUMPS
+    self.execution.stderr = BACKUPS_STDERR
 
-    if not os.path.isfile(self.context.file):
-      raise RuntimeError(f"File '{self.context.file}' doesn't exist.")
+    if not os.path.isfile(self.execution.file):
+      raise RuntimeError(f"File '{self.execution.file}' doesn't exist.")
 
-    self.data = self.parse(self.context.file)
+    self.data = Loader.yaml(self.execution.file)
 
     if not "backups" in self.data.keys():
       raise RuntimeError(f"File '{self.file}' doesn't have a backups top key.")
@@ -48,7 +49,7 @@ class Runner:
     if not job in self.backups["jobs"].keys():
       raise RuntimeError(f"Backup job '{job}' doesn't exist.")
 
-    self.context.job = job
+    self.execution.job = job
 
     self.backup  = self.backups["jobs"][job]
     self.options = self.backup.get("options", {})
@@ -103,7 +104,7 @@ class Runner:
     self.notify()
 
     report = {
-      "context":  self.context
+      "execution":  self.execution
     }
 
     return report
@@ -117,10 +118,10 @@ class Runner:
     if database:
       name = job + "-" + database
 
-    self.context.dump = f"{self.context.dumps}/{name}/{date}/{now}"
+    self.execution.dump = f"{self.execution.dumps}/{name}/{date}/{now}"
 
-    logger.info(f"Using dir {system.green(self.context.dump)}")
-    system.exec(f"mkdir -p {self.context.dump}")
+    logger.info(f"Using dir {system.green(self.execution.dump)}")
+    system.exec(f"mkdir -p {self.execution.dump}")
 
 
   def get_mysql_cmd(self):
@@ -137,8 +138,8 @@ class Runner:
   def dump_server(self):
     logger.info("Dumping the server into a single file")
 
-    sql_file = "%s/%s%s.sql" % (self.context.dump, self.options.get("prefix", ""), "all-databases")
-    err_file = self.options.get("stderr", self.context.stderr)
+    sql_file = "%s/%s%s.sql" % (self.execution.dump, self.options.get("prefix", ""), "all-databases")
+    err_file = self.options.get("stderr", self.execution.stderr)
     command  = f"{self.get_mysql_cmd()} --all-databases > {sql_file} 2>{err_file}"
 
     system.exec(command)
@@ -168,8 +169,8 @@ class Runner:
   def dump_database(self, database):
     logger.info(f"Dumping database {system.green(database)}")
 
-    sql_file = "%s/%s%s.sql" % (self.context.dump, self.options.get("prefix", ""), database)
-    err_file = self.options.get("stderr", self.context.stderr)
+    sql_file = "%s/%s%s.sql" % (self.execution.dump, self.options.get("prefix", ""), database)
+    err_file = self.options.get("stderr", self.execution.stderr)
     command  = f"{self.get_mysql_dump()} --databases {database} > {sql_file} 2>{err_file}"
 
     system.exec(command)
@@ -182,8 +183,8 @@ class Runner:
       return
 
     for config in methods:
-      fn = getattr(compress.Compress, config["type"])
-      fn(config, self.context)
+      fn = getattr(Compressor, config["type"])
+      fn(config, self.execution)
 
 
   def upload(self):
@@ -193,8 +194,8 @@ class Runner:
       return
 
     for config in methods:
-      fn = getattr(upload.Upload, config["type"])
-      fn(config, self.context)
+      fn = getattr(Uploader, config["type"])
+      fn(config, self.execution)
 
 
   def notify(self):
@@ -204,77 +205,18 @@ class Runner:
       return
 
     for config in methods:
-      fn = getattr(notify.Notify, config["type"])
-      fn(config, self.context)
+      fn = getattr(Notifier, config["type"])
+      fn(config, self.execution)
 
 
   def cleanup(self):
     clean = self.options.get("clean", "all")
     if not clean:
-      logger.info(f"Skip cleaning {system.green(self.context.dump)} (clean: {clean})")
+      logger.info(f"Skip cleaning {system.green(self.execution.dump)} (clean: {clean})")
       return
 
-    start = os.path.dirname(self.context.dump)
-    stop = self.context.dumps
+    start = os.path.dirname(self.execution.dump)
+    stop = self.execution.dumps
     logger.info(f"Cleaning from {system.green(start)} until {system.green(stop)}")
-    system.exec(f"rm -frv {self.context.dump}* >>{self.context.stderr} 2>&1")
+    system.exec(f"rm -frv {self.execution.dump}* >>{self.execution.stderr} 2>&1")
     system.cleanup(start, stop)
-
-
-  def parse(self, file):
-    data = Loader.yaml(file)
-
-    return data
-
-    # loader  = yaml.SafeLoader
-    # tagEnv  = '!env'
-    # tagConf = '!conf'
-
-    # patternEnv  = re.compile('.*?\${(\w+):?(.*)}.*?')
-    # patternConf = re.compile('@(.*)')
-
-    # loader.add_implicit_resolver(tagEnv,  patternEnv,  None)
-    # loader.add_implicit_resolver(tagConf, patternConf, None)
-    # yaml.add_constructor("!env", Loader.env, yaml.SafeLoader)
-
-    # def constructorEnv(loader, node):
-    #   try:
-    #     name = loader.construct_scalar(node)
-    #     value = os.environ.get(name)
-    #     if value:
-    #       return value
-    #     return f"!env {name}"
-
-    #   except:
-    #     return f"!env {name}"
-
-    #   # match = patternEnv.findall(value)
-    #   # if match:
-    #   #   res = value
-    #   #   for group in match:
-    #   #     var = os.environ.get(group[0], group[1] or f"${group[0]}")
-    #   #     res = res.replace(value, var)
-    #   #   return res
-
-    #   # return value
-
-    # # def constructorConf(loader, node):
-    # #   value = loader.construct_scalar(node)
-    # #   match = patternConf.findall(value)
-    # #   if match:
-    # #     env = {}
-    # #     with open(match[0], "r") as f:
-    # #       for line in f.readlines():
-    # #         if line.find("=") > 0:
-    # #           key, val = line.split("=")
-    # #           env[key] = val.strip()
-    # #           os.environ[key] = env[key]
-    # #       return env
-    # #   return value
-
-    # loader.add_constructor("!env", constructorEnv)
-    # # loader.add_constructor(tagEnv,  constructorEnv)
-    # # loader.add_constructor(tagConf, constructorConf)
-
-    # with open(file, "r") as f:
-    #   data = yaml.load(f, Loader=loader)

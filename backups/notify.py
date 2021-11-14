@@ -2,15 +2,15 @@ import json
 import requests
 
 
-class Notify:
+class Notifier:
 
   @staticmethod
-  def _size(context):
-    if context.compress is []:
+  def _size(execution):
+    if execution.compress is []:
       return "-"
 
     size = ""
-    for compression in context.compress:
+    for compression in execution.compress:
       size = f"{size}{compression['size']['human']}, "
 
     size = f"{size[0:-2]}"
@@ -18,9 +18,9 @@ class Notify:
 
 
   @staticmethod
-  def slack(config, context):
+  def slack(config, execution):
     webhook = config.get("webhook")
-    text    = f"Backup `{context.job}` completed with *{Notify._size(context)}*"
+    text    = f"Backup `{execution.job}` completed with *{Notifier._size(execution)}*"
     channel = config.get("channel", "#backups")
 
     payload = {
@@ -39,7 +39,7 @@ class Notify:
         % (res.status_code, res.text)
       )
 
-    context.notify.append({
+    execution.notify.append({
       "type": "slack",
       "text": text,
       "status": res.status_code,

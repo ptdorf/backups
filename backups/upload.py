@@ -1,10 +1,9 @@
 import os
 
-from . import logger
 from . import system
 
 
-class Upload:
+class Uploader:
 
   @staticmethod
   def _files(config, context):
@@ -26,9 +25,10 @@ class Upload:
 
   @staticmethod
   def s3(config, context):
+    global logger
     bucket  = config.get("bucket")
     uploads = []
-    folder, files = Upload._files(config, context)
+    folder, files = Uploader._files(config, context)
     for file, name in files:
       name = os.path.basename(file)
       dest = f"s3://{bucket}/{folder}/{name}"
@@ -48,7 +48,7 @@ class Upload:
   def gs(config, context):
     bucket  = config.get("bucket")
     uploads = []
-    folder, files = Upload._files(config, context)
+    folder, files = Uploader._files(config, context)
     for file, name in files:
       name = os.path.basename(file)
       dest = f"gs://{bucket}/{folder}/{name}"
@@ -68,7 +68,7 @@ class Upload:
   def rsync(config, context):
     directory = config.get("directory")
     uploads = []
-    folder, files = Upload._files(config, context)
+    folder, files = Uploader._files(config, context)
     for file, name in files:
       name = os.path.basename(file)
       dest = f"{directory}/{folder}/{name}"

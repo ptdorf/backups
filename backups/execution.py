@@ -2,7 +2,7 @@
 # class Context(data.Data):
 
 
-class Context:
+class Execution:
 
   def __init__(self):
     self.file   = None

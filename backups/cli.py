@@ -1,5 +1,5 @@
 """
-Backs up mysql databases
+Backs up databases servers
 
 Usage:
   backups ls                    [--file FILE]
@@ -31,6 +31,7 @@ Environment variables:
   BACKUPS_MYSQLDUMP     The mysqldump binary (default picked from $PATH)
   BACKUPS_LOG_LEVEL     Default INFO
   BACKUPS_STDERR        The stderr log file (default /tmp/backups.err)
+  BACKUPS_VERBOSE       Set verbosity (default False)
 
 Check https://github.com/ptdorf/backups#backups for more info
 """
@@ -39,17 +40,39 @@ import yaml
 import docopt
 
 from . import version
-from . import runner
 
-BACKUPS_FILE       = os.environ.get("BACKUPS_FILE", "/etc/backups/backups.yaml")
-BACKUPS_DUMPS_DIR  = os.environ.get("BACKUPS_DUMPS_DIR", "/tmp/backups")
-BACKUPS_MYSQLDUMP  = os.environ.get("BACKUPS_MYSQLDUMP", "mysqldump")
-BACKUPS_LOG_LEVEL  = os.environ.get("BACKUPS_LOG_LEVEL", "INFO")
-BACKUPS_STDERR     = os.environ.get("BACKUPS_STDERR", "/tmp/backups.err")
+from .logger import Logger
+from .runner import Runner
+
+DEFAULT_FILE       = "/etc/backups/backups.yaml"
+DEFAULT_DUMPS_DIR  = "/tmp/backups"
+DEFAULT_MYSQLDUMP  = "mysqldump"
+DEFAULT_LOG_LEVEL  = "INFO"
+DEFAULT_STDERR     = "/tmp/backups.err"
+DEFAULT_VERBOSE    = False
+
+BACKUPS_FILE       = os.environ.get("BACKUPS_FILE",       DEFAULT_FILE)
+BACKUPS_DUMPS_DIR  = os.environ.get("BACKUPS_DUMPS_DIR",  DEFAULT_DUMPS_DIR)
+BACKUPS_MYSQLDUMP  = os.environ.get("BACKUPS_MYSQLDUMP",  DEFAULT_MYSQLDUMP)
+BACKUPS_LOG_LEVEL  = os.environ.get("BACKUPS_LOG_LEVEL",  DEFAULT_LOG_LEVEL)
+BACKUPS_STDERR     = os.environ.get("BACKUPS_STDERR",     DEFAULT_STDERR)
+BACKUPS_VERBOSE    = os.environ.get("BACKUPS_VERBOSE",    DEFAULT_VERBOSE)
+
+logger = Logger(BACKUPS_VERBOSE)
 
 
 def main():
   args = docopt.docopt(__doc__, version=version.VERSION)
+
+  if BACKUPS_VERBOSE:
+    args["--verbose"] = True
+
+  if args["--verbose"]:
+    logger.debug("Verbosity: enabled")
+    logger.debug("Arguments:")
+    for k, v in args.items():
+      logger.debug(f"  {k}: {v}")
+
   if args["version"]:
     print(version.VERSION)
     return
@@ -57,12 +80,6 @@ def main():
   if args["help"]:
     print(__doc__)
     return
-
-  if args["--verbose"]:
-    print("Verbosity enabled")
-    print("Backups arguments")
-    for k, v in args.items():
-      print(f"- \033[38;5;242m{k}: {v}\033[0m")
 
   file = args['--file'] if args['--file'] else BACKUPS_FILE
 
@@ -83,20 +100,20 @@ def main():
     print("  BACKUPS_STDERR        ", BACKUPS_STDERR)
     return
 
-  run = runner.Runner(file, args['--dryrun'])
-  run.verbose = args["--verbose"]
+  runner = Runner(file, args['--dryrun'])
+  runner.verbose = args["--verbose"]
 
   if args["ls"]:
-    return run.ls()
+    return runner.ls()
 
   if args["show"]:
-    return run.show(args.get("JOB"))
+    return runner.show(args.get("JOB"))
 
   if args["databases"]:
-    return run.databases(args["JOB"])
+    return runner.databases(args["JOB"])
 
   if args["run"]:
-    report = run.run(args["JOB"], args["DATABASE"])
+    report = runner.run(args["JOB"], args["DATABASE"])
     print("\nREPORT")
     print(yaml.dump(report, sort_keys=False))
 

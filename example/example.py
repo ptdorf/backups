@@ -1,9 +1,8 @@
-import sys
+import os
 
 from backups import cli
 
-sys.argv.append("--file")
-sys.argv.append("example/backups.yaml")
-sys.argv.append("show")
+if not os.environ.get("BACKUPS_FILE"):
+  os.environ["BACKUPS_FILE"] = "example/backups.yaml"
 
 cli.main()
