@@ -10,21 +10,21 @@ backups:
         password:   !Env BACKUPS_DB_PASSWORD
       options:
         ignore:
-        - test_db
+        - ignored
 
-      compress:
-      - type: zip
-        password: !Env BACKUPS_ZIP_PASSWORD
+      # compress:
+      # - type: zip
+      #   password: !Env BACKUPS_ZIP_PASSWORD
 
-      upload:
-      - type: gs
-        bucket: !Env [BACKUPS_GS_BUCKET, jpedro-backups]
-        prefix: !Env ["prefix/${BACKUPS_DB_HOST}/${BACKUPS_PREFIX}/suffix", jpedro-backups]
-      - type: s3
-        bucket: !Env [BACKUPS_S3_BUCKET, jpedro-backups]
-        prefix: !Env [BACKUPS_PREFIX, databases]
-        enabled: false
+      # upload:
+      # - type: gs
+      #   bucket: !Env [BACKUPS_GS_BUCKET, jpedro-backups]
+      #   prefix: !Env ["prefix/${BACKUPS_DB_HOST}/${BACKUPS_PREFIX}/suffix", jpedro-backups]
+      # - type: s3
+      #   bucket: !Env [BACKUPS_S3_BUCKET, jpedro-backups]
+      #   prefix: !Env [BACKUPS_PREFIX, databases]
+      #   enabled: false
 
-      notify:
-      - type: slack
-        webhook: !Env [BACKUPS_SLACK_WEBHOOK, "https://hooks.slack.com/services/x/y/z"]
+      # notify:
+      # - type: slack
+      #   webhook: !Env [BACKUPS_SLACK_WEBHOOK, "https://hooks.slack.com/services/x/y/z"]

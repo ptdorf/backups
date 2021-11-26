@@ -2,35 +2,28 @@ import os
 import time
 import yaml
 
-from . import logger
-from . import system
 from . import mysql
 
+from .logger import Logger
 from .execution import Execution
 from .loader import Loader
+from .system import System
 from .compress import Compressor
 from .upload import Uploader
 from .notify import Notifier
 
 
-BACKUPS_DUMPS     = os.environ.get("BACKUPS_DUMPS", "/tmp/backups")
-BACKUPS_MYSQLDUMP = os.environ.get("BACKUPS_MYSQLDUMP", "mysqldump")
-BACKUPS_LOGLEVEL  = os.environ.get("BACKUPS_LOGLEVEL", "INFO")
-BACKUPS_STDERR    = os.environ.get("BACKUPS_STDERR", "/tmp/backups.err")
+BACKUPS_DUMP_DIR = os.environ.get("BACKUPS_DUMP_DIR", "/tmp/backups")
+BACKUPS_DUMP_BIN = os.environ.get("BACKUPS_DUMP_BIN", "mysqldump")
+BACKUPS_STDERR   = os.environ.get("BACKUPS_STDERR",   "/tmp/backups.err")
 
 
 class Runner:
 
-  execution = Execution()
-  verbose = False
 
-  def __init__(self, file, dryrun):
-    system.dryrun = dryrun
-
-    self.execution.file   = file
-    self.execution.dryrun = dryrun
-    self.execution.dumps  = BACKUPS_DUMPS
-    self.execution.stderr = BACKUPS_STDERR
+  def __init__(self, execution: Execution):
+    System.DRYRUN = execution.dryrun
+    self.execution = execution
 
     if not os.path.isfile(self.execution.file):
       raise RuntimeError(f"File '{self.execution.file}' doesn't exist.")
@@ -53,10 +46,6 @@ class Runner:
 
     self.backup  = self.backups["jobs"][job]
     self.options = self.backup.get("options", {})
-
-
-  def dump(self):
-    print(yaml.dump(self.data, sort_keys=False))
 
 
   def ls(self):
@@ -82,21 +71,19 @@ class Runner:
 
 
   def run(self, job, database):
-    system.verbose = self.verbose
-
     self.load(job)
     self.mysql = mysql.Mysql(self.backup["connection"])
     self.prepare(job, database)
 
     if database:
-      self.dump_database(database)
+      self.dumpDatabase(database)
 
     elif self.options.get("server", False) == True:
-      self.dump_server()
+      self.dumpServer()
 
     else:
       databases = self.options.get("databases", [])
-      self.dump_databases(databases)
+      self.dumpDatabases(databases)
 
     self.compress()
     self.upload()
@@ -111,6 +98,7 @@ class Runner:
 
 
   def prepare(self, job, database=None):
+    global logger
     date = time.strftime("%Y/%m/%d")
     now  = time.strftime("%Y-%m-%d-%H%M%S")
     name = job
@@ -120,14 +108,14 @@ class Runner:
 
     self.execution.dump = f"{self.execution.dumps}/{name}/{date}/{now}"
 
-    logger.info(f"Using dir {system.green(self.execution.dump)}")
-    system.exec(f"mkdir -p {self.execution.dump}")
+    Logger.info(f"Using dir {System.green(self.execution.dump)}")
+    System.exec(f"mkdir -p {self.execution.dump}")
 
 
-  def get_mysql_cmd(self):
+  def getMysqlCmd(self):
     return "%s -alv --host=%s --user=%s --password=%s --master-data=%i --triggers --events --dump-date --debug-info --single-transaction" % \
       (
-        BACKUPS_MYSQLDUMP,
+        BACKUPS_DUMP_BIN,
         self.backup["connection"].get("host", ""),
         self.backup["connection"].get("username", ""),
         self.backup["connection"].get("password", ""),
@@ -135,19 +123,19 @@ class Runner:
       )
 
 
-  def dump_server(self):
-    logger.info("Dumping the server into a single file")
+  def dumpServer(self):
+    Logger.info("Dumping the server into a single file")
 
     sql_file = "%s/%s%s.sql" % (self.execution.dump, self.options.get("prefix", ""), "all-databases")
     err_file = self.options.get("stderr", self.execution.stderr)
-    command  = f"{self.get_mysql_cmd()} --all-databases > {sql_file} 2>{err_file}"
+    command  = f"{self.getMysqlCmd()} --all-databases > {sql_file} 2>{err_file}"
 
-    system.exec(command)
+    System.exec(command)
 
 
 
-  def dump_databases(self, databases):
-    logger.info("Dumping databases")
+  def dumpDatabases(self, databases):
+    Logger.info("Dumping databases")
 
     ignore  = self.options.get("ignore", [])
     ignored = ignore + ["information_schema", "performance_schema", "sys"]
@@ -157,29 +145,29 @@ class Runner:
       for row in rows:
         db = row["db"]
         if db in ignored:
-          logger.info(f"Ignoring {system.green(db)}")
+          Logger.info(f"Ignoring {System.green(db)}")
           continue
 
         databases.append(db)
 
     for database in databases:
-      self.dump_database(database)
+      self.dumpDatabase(database)
 
 
-  def dump_database(self, database):
-    logger.info(f"Dumping database {system.green(database)}")
+  def dumpDatabase(self, database):
+    Logger.info(f"Dumping database {System.green(database)}")
 
     sql_file = "%s/%s%s.sql" % (self.execution.dump, self.options.get("prefix", ""), database)
     err_file = self.options.get("stderr", self.execution.stderr)
-    command  = f"{self.get_mysql_dump()} --databases {database} > {sql_file} 2>{err_file}"
+    command  = f"{self.getMysqlCmd()} --databases {database} > {sql_file} 2>{err_file}"
 
-    system.exec(command)
+    System.exec(command)
 
 
   def compress(self):
     methods = self.backup.get("compress", [])
     if methods is []:
-      logger.info("Skipping compress")
+      Logger.info("Skipping compress")
       return
 
     for config in methods:
@@ -190,7 +178,7 @@ class Runner:
   def upload(self):
     methods = self.backup.get("upload", [])
     if methods is []:
-      logger.info("Skipping uploads")
+      Logger.info("Skipping uploads")
       return
 
     for config in methods:
@@ -201,7 +189,7 @@ class Runner:
   def notify(self):
     methods = self.backup.get("notify", [])
     if methods is []:
-      logger.info("Skipping notify")
+      Logger.debug("Skipping notify")
       return
 
     for config in methods:
@@ -211,12 +199,13 @@ class Runner:
 
   def cleanup(self):
     clean = self.options.get("clean", "all")
-    if not clean:
-      logger.info(f"Skip cleaning {system.green(self.execution.dump)} (clean: {clean})")
+    return
+    if not clean or self.execution.dryrun:
+      Logger.debug(f"Skip cleaning {System.green(self.execution.dump)} (clean: {clean})")
       return
 
     start = os.path.dirname(self.execution.dump)
     stop = self.execution.dumps
-    logger.info(f"Cleaning from {system.green(start)} until {system.green(stop)}")
-    system.exec(f"rm -frv {self.execution.dump}* >>{self.execution.stderr} 2>&1")
-    system.cleanup(start, stop)
+    Logger.debug(f"Cleaning from {System.green(start)} until {System.green(stop)}")
+    System.exec(f"rm -frv {self.execution.dump}* >>{self.execution.stderr} 2>&1")
+    System.cleanup(start, stop)

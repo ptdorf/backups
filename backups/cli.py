@@ -42,36 +42,57 @@ import docopt
 from . import version
 
 from .logger import Logger
+from .execution import Execution
 from .runner import Runner
 
-DEFAULT_FILE       = "/etc/backups/backups.yaml"
-DEFAULT_DUMPS_DIR  = "/tmp/backups"
-DEFAULT_MYSQLDUMP  = "mysqldump"
-DEFAULT_LOG_LEVEL  = "INFO"
-DEFAULT_STDERR     = "/tmp/backups.err"
-DEFAULT_VERBOSE    = False
+DEFAULT_FILE      = "/etc/backups/backups.yaml"
+DEFAULT_DUMP_DIR  = "/tmp/backups"
+DEFAULT_DUMP_BIN  = "mysqldump"
+DEFAULT_LOG_LEVEL = "INFO"
+DEFAULT_STDERR    = "/tmp/backups.err"
+DEFAULT_DRYRUN    = False
+DEFAULT_VERBOSE   = False
 
-BACKUPS_FILE       = os.environ.get("BACKUPS_FILE",       DEFAULT_FILE)
-BACKUPS_DUMPS_DIR  = os.environ.get("BACKUPS_DUMPS_DIR",  DEFAULT_DUMPS_DIR)
-BACKUPS_MYSQLDUMP  = os.environ.get("BACKUPS_MYSQLDUMP",  DEFAULT_MYSQLDUMP)
-BACKUPS_LOG_LEVEL  = os.environ.get("BACKUPS_LOG_LEVEL",  DEFAULT_LOG_LEVEL)
-BACKUPS_STDERR     = os.environ.get("BACKUPS_STDERR",     DEFAULT_STDERR)
-BACKUPS_VERBOSE    = os.environ.get("BACKUPS_VERBOSE",    DEFAULT_VERBOSE)
 
-logger = Logger(BACKUPS_VERBOSE)
+class Cli:
+
+  def __init__(self):
+    self.load()
+
+
+  def load(self):
+    self.env = {
+      "file"       : os.environ.get("BACKUPS_FILE",       DEFAULT_FILE),
+      "dump_dir"   : os.environ.get("BACKUPS_DUMP_DIR",   DEFAULT_DUMP_DIR),
+      "dump_bin"   : os.environ.get("BACKUPS_DUMP_BIN",   DEFAULT_DUMP_BIN),
+      "log_level"  : os.environ.get("BACKUPS_LOG_LEVEL",  DEFAULT_LOG_LEVEL),
+      "dryrun"     : os.environ.get("BACKUPS_DRYRUN",     DEFAULT_DRYRUN),
+      "stderr"     : os.environ.get("BACKUPS_STDERR",     DEFAULT_STDERR),
+      "verbose"    : os.environ.get("BACKUPS_VERBOSE",    DEFAULT_VERBOSE),
+    }
+
+    Logger.level(self.env["log_level"])
+
+
+  def version(self):
+    print(version.VERSION)
+
+
+  def help(self):
+    print(__doc__)
 
 
 def main():
   args = docopt.docopt(__doc__, version=version.VERSION)
+  cli = Cli()
+  cli.run(args)
 
-  if BACKUPS_VERBOSE:
+  if env["verbose"]:
     args["--verbose"] = True
 
-  if args["--verbose"]:
-    logger.debug("Verbosity: enabled")
-    logger.debug("Arguments:")
-    for k, v in args.items():
-      logger.debug(f"  {k}: {v}")
+  Logger.debug("Arguments:")
+  for k, v in args.items():
+    Logger.debug(f"  {k}: {v}")
 
   if args["version"]:
     print(version.VERSION)
@@ -81,27 +102,35 @@ def main():
     print(__doc__)
     return
 
-  file = args['--file'] if args['--file'] else BACKUPS_FILE
+  file = args['--file'] if args['--file'] else env["file"]
 
   if args["env"]:
-    print("Backups environment")
-    print("  File          ", file)
-    print("  Dumps dir     ", BACKUPS_DUMPS_DIR)
-    print("  Mysqldump     ", BACKUPS_MYSQLDUMP)
-    print("  Log level     ", BACKUPS_LOG_LEVEL)
-    print("  Stderr        ", BACKUPS_STDERR)
+    print("Backups defaults")
+    print("  File          ", DEFAULT_FILE)
+    print("  Dump dir      ", DEFAULT_DUMP_DIR)
+    print("  Dump bin      ", DEFAULT_DUMP_BIN)
+    print("  Log level     ", DEFAULT_LOG_LEVEL)
+    print("  Dryrun        ", DEFAULT_DRYRUN)
+    print("  Stderr        ", DEFAULT_STDERR)
     print("  Version       ", version.VERSION)
     print("")
     print("Environment variables")
-    print("  BACKUPS_FILE          ", BACKUPS_FILE)
-    print("  BACKUPS_DUMPS_DIR     ", BACKUPS_DUMPS_DIR)
-    print("  BACKUPS_MYSQLDUMP     ", BACKUPS_MYSQLDUMP)
-    print("  BACKUPS_LOG_LEVEL     ", BACKUPS_LOG_LEVEL)
-    print("  BACKUPS_STDERR        ", BACKUPS_STDERR)
+    print("  BACKUPS_FILE          ", env["file"])
+    print("  BACKUPS_DUMP_DIR      ", env["dump_dir"])
+    print("  BACKUPS_DUMP_BIN      ", env["dump_dir"])
+    print("  BACKUPS_LOG_LEVEL     ", env["log_level"])
+    print("  BACKUPS_STDERR        ", env["stderr"])
+    print("  BACKUPS_DRYRUN        ", env["dryrun"])
     return
 
-  runner = Runner(file, args['--dryrun'])
-  runner.verbose = args["--verbose"]
+  kwargs = {
+    "file": file,
+    "stderr": env["stderr"],
+    "dryrun": env["dryrun"],
+  }
+
+  execution = Execution(**kwargs)
+  runner = Runner(execution)
 
   if args["ls"]:
     return runner.ls()

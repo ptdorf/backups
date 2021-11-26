@@ -1,35 +1,50 @@
+import os
 import time
-import logging
+
 
 class Logger:
 
   COLOR_DEBUG = "38;5;242"
-  COLOR_INFO = "0"
-  COLOR_WARN = "32;1"
+  COLOR_INFO  = "0"
+  COLOR_WARN  = "32;1"
   COLOR_ERROR = "31;1"
 
+  LEVEL = os.environ.get("BACKUPS_LOG_LEVEL", "INFO").lower()
+  TIMES = bool(os.environ.get("BACKUPS_LOG_TIMES", ""))
 
-  def __init__(self, verbose: bool):
-    self.verbose = verbose
-    self.logger = logging.getLogger(__name__)
-
-    if self.verbose:
-      self.logger.setLevel(logging.DEBUG)
-
-    self.logger.addHandler(logging.StreamHandler())
+  @classmethod
+  def level(cls, value: str = None):
+    if value is None:
+      return Logger.LEVEL
+    Logger.LEVEL = value
 
 
-  def _format(self, message: str, color: str = None):
-    if color:
+  @classmethod
+  def timestamps(cls, value: bool = None):
+    if value is None:
+      return cls.TIMES
+    cls.TIMES = value
+
+
+  @classmethod
+  def _print(cls, message: str, color: str = "0"):
+    message = f"\033[{color}m{message}\033[0m"
+
+    if Logger.TIMES:
       now = time.strftime("%Y-%m-%d %H:%M:%S")
-      return f"\033[{color}m{now}  {message}\033[0m"
+      message = f"\033[{cls.COLOR_DEBUG}m{now}\033[0m  {message}"
 
-    return message
-
-
-  def info(self, message: str):
-    self.logger.info(self._format(message))
+    print(message)
 
 
-  def debug(self, message: str):
-    self.logger.debug(self._format(message, self.COLOR_DEBUG))
+  @classmethod
+  def info(cls, message: str):
+    cls._print(message)
+
+
+  @classmethod
+  def debug(cls, message: str):
+    if cls.LEVEL != "debug":
+      return
+
+    cls._print(message, cls.COLOR_DEBUG)

@@ -4,7 +4,7 @@
 
 class Execution:
 
-  def __init__(self):
+  def __init__(self, **kwargs):
     self.file   = None
     self.job    = None
     self.dumps  = None
@@ -15,6 +15,10 @@ class Execution:
     self.compress = []
     self.upload   = []
     self.notify   = []
+
+    for k, v in kwargs.items():
+      # print(f"{k} :: {v}")
+      setattr(self, k, v)
 
 
   def __str__(self):
