@@ -28,7 +28,7 @@ jobs:
         BACKUPS_SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
       run: |
         echo "==> backups --version"
-        backups --version
+        backups version
 
         echo "==> backups ls"
         backups ls

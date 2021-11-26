@@ -4,51 +4,58 @@ from . import system
 from . import logger
 
 
-def _size(file):
-  size  = "-"
-  human = "-"
+class Compressor:
 
-  if os.path.isfile(file):
-    size  = os.path.getsize(file)
-    human = system.size(size)
+  @staticmethod
+  def _size(file):
+    size  = "-"
+    human = "-"
 
-  return {
-    "bytes": size,
-    "human": human,
-  }
+    if os.path.isfile(file):
+      size  = os.path.getsize(file)
+      human = system.size(size)
 
-def _details(context, ext):
-  base = os.path.dirname(context.dump)
-  path = os.path.basename(context.dump)
-  file = f"{context.dump}.{ext}"
-
-  return base, path, file
+    return {
+      "bytes": size,
+      "human": human,
+    }
 
 
-def compress_zip(config, context):
-  password = config.get("password", "biteme")
-  base, path, file = _details(context, "zip")
+  @staticmethod
+  def _details(execution, ext):
+    base = os.path.dirname(execution.dump)
+    path = os.path.basename(execution.dump)
+    file = f"{execution.dump}.{ext}"
 
-  logger.info(f"Compressing into {system.green(file)}")
-  command = f"cd {base} && zip --password {password} -r {file} {path} >>{context.stderr} 2>&1"
-  system.exec(command)
-
-  context.compress.append({
-    "type": "zip",
-    "file": file,
-    "size": _size(file),
-  })
+    return base, path, file
 
 
-def compress_tgz(config, context):
-  base, path, file = _details(context, "tgz")
+  @staticmethod
+  def zip(config, execution):
+    password = config.get("password", "biteme")
+    base, path, file = Compressor._details(execution, "zip")
 
-  logger.info(f"Compressing into {system.green(file)}")
-  command = f"cd {base} && tar -czvf {file} {path} >>{context.stderr} 2>&1"
-  system.exec(command)
+    logger.info(f"Compressing into {system.green(file)}")
+    command = f"cd {base} && zip --password {password} -r {file} {path} >>{execution.stderr} 2>&1"
+    system.exec(command)
 
-  context.compress.append({
-    "type": "tgz",
-    "file": file,
-    "size": _size(file),
-  })
+    execution.compress.append({
+      "type": "zip",
+      "file": file,
+      "size": Compressor._size(file),
+    })
+
+
+  @staticmethod
+  def tgz(config, execution):
+    base, path, file = Compressor._details(execution, "tgz")
+
+    logger.info(f"Compressing into {system.green(file)}")
+    command = f"cd {base} && tar -czvf {file} {path} >>{execution.stderr} 2>&1"
+    system.exec(command)
+
+    execution.compress.append({
+      "type": "tgz",
+      "file": file,
+      "size": Compressor._size(file),
+    })

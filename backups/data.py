@@ -16,7 +16,7 @@ Simple data object that holds some values
       gcloud assured operations list commands to use separate flags for
       organization and location.
 """
-class Object():
+class Data:
 
   def __str__(self):
     text = str(self.__class__) + "{"

@@ -1,40 +1,34 @@
 import os
-import re
 import time
 import yaml
 
-from . import logger
-from . import system
-from . import context
 from . import mysql
-from . import compress
-from . import upload
-from . import notify
+
+from .logger import Logger
+from .execution import Execution
+from .loader import Loader
+from .system import System
+from .compress import Compressor
+from .upload import Uploader
+from .notify import Notifier
 
 
-BACKUPS_DUMPS     = os.environ.get("BACKUPS_DUMPS", "/tmp/backups")
-BACKUPS_MYSQLDUMP = os.environ.get("BACKUPS_MYSQLDUMP", "mysqldump")
-BACKUPS_LOGLEVEL  = os.environ.get("BACKUPS_LOGLEVEL", "INFO")
-BACKUPS_STDERR    = os.environ.get("BACKUPS_STDERR", "/tmp/backups.err")
+BACKUPS_DUMP_DIR = os.environ.get("BACKUPS_DUMP_DIR", "/tmp/backups")
+BACKUPS_DUMP_BIN = os.environ.get("BACKUPS_DUMP_BIN", "mysqldump")
+BACKUPS_STDERR   = os.environ.get("BACKUPS_STDERR",   "/tmp/backups.err")
 
 
 class Runner:
 
-  context = context.Context()
-  verbose = False
 
-  def __init__(self, file, dryrun):
-    system.dryrun = dryrun
+  def __init__(self, execution: Execution):
+    System.DRYRUN = execution.dryrun
+    self.execution = execution
 
-    self.context.file   = file
-    self.context.dryrun = dryrun
-    self.context.dumps  = BACKUPS_DUMPS
-    self.context.stderr = BACKUPS_STDERR
+    if not os.path.isfile(self.execution.file):
+      raise RuntimeError(f"File '{self.execution.file}' doesn't exist.")
 
-    if not os.path.isfile(self.context.file):
-      raise RuntimeError(f"File '{self.context.file}' doesn't exist.")
-
-    self.data = self.parse(self.context.file)
+    self.data = Loader.yaml(self.execution.file)
 
     if not "backups" in self.data.keys():
       raise RuntimeError(f"File '{self.file}' doesn't have a backups top key.")
@@ -48,14 +42,10 @@ class Runner:
     if not job in self.backups["jobs"].keys():
       raise RuntimeError(f"Backup job '{job}' doesn't exist.")
 
-    self.context.job = job
+    self.execution.job = job
 
     self.backup  = self.backups["jobs"][job]
     self.options = self.backup.get("options", {})
-
-
-  def dump(self):
-    print(yaml.dump(self.data, sort_keys=False))
 
 
   def ls(self):
@@ -63,9 +53,12 @@ class Runner:
       print(job)
 
 
-  def show(self, job):
-    self.load(job)
-    print(yaml.dump(self.backup, sort_keys=False))
+  def show(self, job=None):
+    if job:
+      self.load(job)
+      print(yaml.dump(self.backup, sort_keys=False))
+    else:
+      print(yaml.dump(self.data, sort_keys=False))
 
 
   def databases(self, job):
@@ -73,26 +66,24 @@ class Runner:
 
     self.mysql = mysql.Mysql(self.backup["connection"])
     rows = self.mysql.query("SHOW DATABASES")
-    for i in rows:
-      print(i["Database"])
+    for row in rows:
+      print(row["Database"])
 
 
   def run(self, job, database):
-    system.verbose = self.verbose
-
     self.load(job)
     self.mysql = mysql.Mysql(self.backup["connection"])
     self.prepare(job, database)
 
     if database:
-      self.dump_database(database)
+      self.dumpDatabase(database)
 
     elif self.options.get("server", False) == True:
-      self.dump_server()
+      self.dumpServer()
 
     else:
       databases = self.options.get("databases", [])
-      self.dump_databases(databases)
+      self.dumpDatabases(databases)
 
     self.compress()
     self.upload()
@@ -100,13 +91,14 @@ class Runner:
     self.notify()
 
     report = {
-      "context":  self.context
+      "execution":  self.execution
     }
 
     return report
 
 
   def prepare(self, job, database=None):
+    global logger
     date = time.strftime("%Y/%m/%d")
     now  = time.strftime("%Y-%m-%d-%H%M%S")
     name = job
@@ -114,16 +106,16 @@ class Runner:
     if database:
       name = job + "-" + database
 
-    self.context.dump = f"{self.context.dumps}/{name}/{date}/{now}"
+    self.execution.dump = f"{self.execution.dumps}/{name}/{date}/{now}"
 
-    logger.info(f"Using dir {system.green(self.context.dump)}")
-    system.exec(f"mkdir -p {self.context.dump}")
+    Logger.info(f"Using dir {System.green(self.execution.dump)}")
+    System.exec(f"mkdir -p {self.execution.dump}")
 
 
-  def get_mysql_dump(self):
+  def getMysqlCmd(self):
     return "%s -alv --host=%s --user=%s --password=%s --master-data=%i --triggers --events --dump-date --debug-info --single-transaction" % \
       (
-        BACKUPS_MYSQLDUMP,
+        BACKUPS_DUMP_BIN,
         self.backup["connection"].get("host", ""),
         self.backup["connection"].get("username", ""),
         self.backup["connection"].get("password", ""),
@@ -131,19 +123,19 @@ class Runner:
       )
 
 
-  def dump_server(self):
-    logger.info("Dumping the server into a single file")
+  def dumpServer(self):
+    Logger.info("Dumping the server into a single file")
 
-    sql_file = "%s/%s%s.sql" % (self.context.dump, self.options.get("prefix", ""), "all-databases")
-    err_file = self.options.get("stderr", self.context.stderr)
-    command  = f"{self.get_mysql_dump()} --all-databases > {sql_file} 2>{err_file}"
+    sql_file = "%s/%s%s.sql" % (self.execution.dump, self.options.get("prefix", ""), "all-databases")
+    err_file = self.options.get("stderr", self.execution.stderr)
+    command  = f"{self.getMysqlCmd()} --all-databases > {sql_file} 2>{err_file}"
 
-    system.exec(command)
+    System.exec(command)
 
 
 
-  def dump_databases(self, databases):
-    logger.info("Dumping databases")
+  def dumpDatabases(self, databases):
+    Logger.info("Dumping databases")
 
     ignore  = self.options.get("ignore", [])
     ignored = ignore + ["information_schema", "performance_schema", "sys"]
@@ -153,112 +145,67 @@ class Runner:
       for row in rows:
         db = row["db"]
         if db in ignored:
-          logger.info(f"Ignoring {system.green(db)}")
+          Logger.info(f"Ignoring {System.green(db)}")
           continue
 
         databases.append(db)
 
     for database in databases:
-      self.dump_database(database)
+      self.dumpDatabase(database)
 
 
-  def dump_database(self, database):
-    logger.info(f"Dumping database {system.green(database)}")
+  def dumpDatabase(self, database):
+    Logger.info(f"Dumping database {System.green(database)}")
 
-    sql_file = "%s/%s%s.sql" % (self.context.dump, self.options.get("prefix", ""), database)
-    err_file = self.options.get("stderr", self.context.stderr)
-    command  = f"{self.get_mysql_dump()} --databases {database} > {sql_file} 2>{err_file}"
+    sql_file = "%s/%s%s.sql" % (self.execution.dump, self.options.get("prefix", ""), database)
+    err_file = self.options.get("stderr", self.execution.stderr)
+    command  = f"{self.getMysqlCmd()} --databases {database} > {sql_file} 2>{err_file}"
 
-    system.exec(command)
+    System.exec(command)
 
 
   def compress(self):
     methods = self.backup.get("compress", [])
     if methods is []:
-      logger.info("Skipping compress")
+      Logger.info("Skipping compress")
       return
 
     for config in methods:
-      f = getattr(compress, "compress_" + config["type"])
-      f(config, self.context)
+      fn = getattr(Compressor, config["type"])
+      fn(config, self.execution)
 
 
   def upload(self):
     methods = self.backup.get("upload", [])
     if methods is []:
-      logger.info("Skipping uploads")
+      Logger.info("Skipping uploads")
       return
 
     for config in methods:
-      f = getattr(upload, "upload_" + config["type"])
-      f(config, self.context)
+      fn = getattr(Uploader, config["type"])
+      fn(config, self.execution)
 
 
   def notify(self):
     methods = self.backup.get("notify", [])
     if methods is []:
-      logger.info("Skipping notify")
+      Logger.debug("Skipping notify")
       return
 
     for config in methods:
-      f = getattr(notify, "notify_" + config["type"])
-      f(config, self.context)
+      fn = getattr(Notifier, config["type"])
+      fn(config, self.execution)
 
 
   def cleanup(self):
     clean = self.options.get("clean", "all")
-    if not clean:
-      logger.info(f"Skip cleaning {system.green(self.context.dump)} (clean: {clean})")
+    return
+    if not clean or self.execution.dryrun:
+      Logger.debug(f"Skip cleaning {System.green(self.execution.dump)} (clean: {clean})")
       return
 
-    start = os.path.dirname(self.context.dump)
-    stop = self.context.dumps
-    logger.info(f"Cleaning from {system.green(start)} until {system.green(stop)}")
-    system.exec(f"rm -frv {self.context.dump}* >>{self.context.stderr} 2>&1")
-    system.cleanup(start, stop)
-
-
-  def parse(self, file):
-    loader  = yaml.SafeLoader
-    tagEnv  = '!Env'
-    tagConf = '!Conf'
-
-    patternEnv  = re.compile('.*?\${(\w+):?(.*)}.*?')
-    patternConf = re.compile('@(.*)')
-
-    loader.add_implicit_resolver(tagEnv,  patternEnv,  None)
-    loader.add_implicit_resolver(tagConf, patternConf, None)
-
-    def constructorEnv(loader, node):
-      value = loader.construct_scalar(node)
-      match = patternEnv.findall(value)
-      if match:
-        res = value
-        for group in match:
-          var = os.environ.get(group[0], group[1] or f"${group[0]}")
-          res = res.replace(value, var)
-        return res
-
-      return value
-
-    def constructorConf(loader, node):
-      value = loader.construct_scalar(node)
-      match = patternConf.findall(value)
-      if match:
-        env = {}
-        with open(match[0], "r") as f:
-          for line in f.readlines():
-            if line.find("=") > 0:
-              key, val = line.split("=")
-              env[key] = val.strip()
-              os.environ[key] = env[key]
-          return env
-      return value
-
-    loader.add_constructor(tagEnv,  constructorEnv)
-    loader.add_constructor(tagConf, constructorConf)
-
-    with open(file, "r") as f:
-      data = yaml.load(f, Loader=loader)
-
-    return data
+    start = os.path.dirname(self.execution.dump)
+    stop = self.execution.dumps
+    Logger.debug(f"Cleaning from {System.green(start)} until {System.green(stop)}")
+    System.exec(f"rm -frv {self.execution.dump}* >>{self.execution.stderr} 2>&1")
+    System.cleanup(start, stop)

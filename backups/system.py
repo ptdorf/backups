@@ -1,41 +1,50 @@
 import os
 
-from . import logger
-
-dryrun  = False
-verbose = False
-
-def exec(command):
-  if verbose:
-    logger.info(f"\033[38;5;242mRunning '{command}'\033[0m")
-
-  if dryrun:
-    return
-
-  code = os.system(command)
-  if code != 0:
-    raise RuntimeError(f"Command '\033[31;1m{command}\033[0m' failed.")
+from .logger import Logger
 
 
-def size(bytes, suffix="B"):
-  for unit in ["","K","M","G","T","P","E","Z"]:
-    if abs(bytes) < 1024.0:
-      return "%3.1f %s%s" % (bytes, unit, suffix)
-    bytes /= 1024.0
+class System:
 
-  return "%.1f %s%s" % (bytes, "Y", suffix)
+  DRYRUN = False
 
+  @staticmethod
+  def exec(command, dryrun: bool = None):
+    Logger.debug(f"Running '{command}'")
 
-def green(text):
-  return f"\033[32;1m{text}\033[0m"
-
-
-def cleanup(start, stop):
-  while start != stop:
-    try:
-      exec(f"rmdir {start}")
-    except Exception as e:
-      print(f"Failed to remove dir {start}")
+    print(f"system: {System.DRYRUN}")
+    print(f"Local {dryrun}")
+    if dryrun is None and System.DRYRUN is False:
+      print(f"STOP dryrun {command}")
       return
 
-    start = os.path.dirname(start)
+    code = os.system(command)
+    if code != 0:
+      raise RuntimeError(f"Command '{command}' failed.")
+
+
+  @staticmethod
+  def size(bytes, suffix="B"):
+    units = ["", "K", "M", "G", "T", "P", "E", "Z"]
+    for unit in units:
+      if abs(bytes) < 1024.0:
+        return "%3.1f %s%s" % (bytes, unit, suffix)
+      bytes /= 1024.0
+
+    return "%.1f %s%s" % (bytes, "Y", suffix)
+
+
+  @staticmethod
+  def green(message: str) -> str:
+    return f"\033[32;1m{message}\033[0m"
+
+
+  @staticmethod
+  def cleanup(start, stop):
+    while start != stop:
+      try:
+        System.exec(f"rmdir {start}")
+      except Exception as e:
+        print(f"Failed to remove dir {start}")
+        return
+
+      start = os.path.dirname(start)
